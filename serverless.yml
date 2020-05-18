@@ -1,0 +1,46 @@
+service: asu-cic-textract-api
+
+frameworkVersion: '>=1.67.0 <2.0.0'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  timeout: 60
+  memorySize: 256
+  region: us-east-2
+  deploymentBucket:
+    name: ${self:service}-deployment
+
+  environment:
+    BUCKET_FOR_BILLS: ${self:service}-${self:provider.stage}
+
+  resources:
+    Resources:
+      GatewayResponseDefault4XX:
+        Type: 'AWS::ApiGateway::GatewayResponse'
+        Properties:
+          ResponseParameters:
+            gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+            gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          ResponseType: DEFAULT_4XX
+          RestApiId:
+            Ref: 'ApiGatewayRestApi'
+
+      BillsBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+          BucketName: ${self:provider.environment.BUCKET_FOR_BILLS}
+
+package:
+  include:
+    - lib/
+
+functions:
+
+  process-bill:
+    handler: handler.process
+    events:
+      - http:
+          path: ocr
+          method: post
+          cors: true
