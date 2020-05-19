@@ -17,6 +17,13 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/patagoniantech/asu-cic-textract-api#readme",
   "dependencies": {
+    "csv": "^5.3.2",
     "uniqid": "^5.2.0"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1"
+  },
+  "jest": {
+    "verbose": true
   }
 }
