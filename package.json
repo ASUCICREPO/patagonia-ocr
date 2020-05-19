@@ -1,0 +1,22 @@
+{
+  "name": "asu-cic-textract-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "handler.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/patagoniantech/asu-cic-textract-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/patagoniantech/asu-cic-textract-api#readme",
+  "dependencies": {
+    "uniqid": "^5.2.0"
+  }
+}

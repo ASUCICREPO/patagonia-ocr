@@ -5,14 +5,15 @@ frameworkVersion: '>=1.67.0 <2.0.0'
 provider:
   name: aws
   runtime: nodejs12.x
-  timeout: 60
+  timeout: 30
   memorySize: 256
   region: us-east-2
   deploymentBucket:
-    name: ${self:service}-deployment
+    maxPreviousDeploymentArtifacts: 10
+    blockPublicAccess: true
 
   environment:
-    BUCKET_FOR_BILLS: ${self:service}-${self:provider.stage}
+    BUCKET_FOR_BILLS: ${self:service}-${self:provider.stage}-bills
 
   resources:
     Resources:
@@ -30,6 +31,10 @@ provider:
         Type: AWS::S3::Bucket
         Properties:
           BucketName: ${self:provider.environment.BUCKET_FOR_BILLS}
+
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
 
 package:
   include:

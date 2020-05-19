@@ -3,17 +3,8 @@
 
 https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Textract.html
 https://docs.aws.amazon.com/textract/latest/dg/api-async.html
-
-
-  - validate request token
-  - upload POSTed bill to S3
-  - call Textract ~ setInterval with exponential backoff ~
-  - interpret Textract results
-  - detect missing fields
-  - fill-in missing fields parsing from FullText
-  - respond the request
-
 */
+
 const validate_request_token = require('./lib/validate_request_token');
 const upload_bill_to_s3 = require('./lib/upload_bill_to_s3');
 const call_textract = require('./lib/call_textract');
@@ -22,7 +13,7 @@ const detect_missing_fields = require('./lib/detect_missing_fields');
 const fill_missing_fields = require('./lib/fill_missing_fields');
 
 module.exports.process = async (event, context) => {
-  console.log(process.env.BUCKET_FOR_BILLS);
+
   console.log(event, context);
 
   try {
@@ -30,10 +21,13 @@ module.exports.process = async (event, context) => {
     const proceed = await validate_request_token(context);
 
     if(!proceed) {
-      return respond(403, 'Forbidden');
+      return respond(401, 'Unauthorized');
     }
 
-    const { file } = event;
+    //ASSUMING FOR NOW, THAT BILL IS ALREADY IN THE BUCKET
+    /// WILL THEY POST Blob, form-data, or should we fetch the PDF?
+    /*
+    const { file } = event.body;
 
     if(!file) {
       return respond(406, 'Provide a file');
@@ -44,6 +38,9 @@ module.exports.process = async (event, context) => {
     if(!bill) {
       return respond(502, 'Can\' upload file');
     }
+    */
+    // TEMP hardcoded object key
+    const bill = 's3://asu-cic-textract-api-dev-bills/tep_mock_bill_with_notations.pdf';
 
     const ocr = await call_textract(bill);
 
