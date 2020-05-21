@@ -5,68 +5,40 @@ https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Textract.html
 https://docs.aws.amazon.com/textract/latest/dg/api-async.html
 */
 
-const validate_request_token = require('./lib/validate_request_token');
-const upload_bill_to_s3 = require('./lib/upload_bill_to_s3');
-const call_textract = require('./lib/call_textract');
-const interpret_ocr = require('./lib/interpret_ocr');
-const detect_missing_fields = require('./lib/detect_missing_fields');
-const fill_missing_fields = require('./lib/fill_missing_fields');
+const authorize = require('./lib/authorizer');
+const uploadS3 = require('./lib/s3Uploader');
+const callTextract = require('./lib/textractCaller');
+const processBill = require('./lib/billProcessor');
 
 module.exports.process = async (event, context) => {
 
-  console.log(event, context);
-
   try {
 
-    const proceed = await validate_request_token(context);
+    const proceed = await authorize(event);
 
     if(!proceed) {
       return respond(401, 'Unauthorized');
     }
 
-    //ASSUMING FOR NOW, THAT BILL IS ALREADY IN THE BUCKET
-    /// WILL THEY POST Blob, form-data, or should we fetch the PDF?
-    /*
-    const { file } = event.body;
-
-    if(!file) {
-      return respond(406, 'Provide a file');
-    }
-
-    const bill = await upload_bill_to_s3(file);
+    const bill = await uploadS3(event);
 
     if(!bill) {
       return respond(502, 'Can\' upload file');
     }
-    */
-    // TEMP hardcoded object key
-    const bill = 's3://asu-cic-textract-api-dev-bills/tep_mock_bill_with_notations.pdf';
 
-    const ocr = await call_textract(bill);
+  ///////
+  return;
+    // TEMP hardcoded object key
+    //const bill = 's3://asu-cic-textract-api-dev-bills/tep_mock_bill_with_notations.pdf';
+
+
+    const ocr = await callTextract(bill);
 
     if(!ocr) {
       return respond(502, 'Can\' process file');
     }
 
-    const interpreted = await interpret_ocr(ocr);
-
-    if(!interpreted) {
-      return respond(502, 'Can\' satisfy interpreter');
-    }
-
-    const missing = await detect_missing_fields(interpreted);
-
-    if(!missing) { // no missing fields
-      return respond(200, interpreted);
-    }
-
-    const complete = await fill_missing_fields(interpreted, missing);
-
-    if(!complete) {
-      return respond(206, interpreted);
-    }
-
-    return respond(200, complete);
+    return respond(200, ocr);
 
   } catch (e) {
     console.log(e);

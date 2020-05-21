@@ -7,6 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
+    "lint": "./node_modules/.bin/eslint",
     "test": "jest"
   },
   "repository": {
@@ -17,10 +18,12 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/patagoniantech/asu-cic-textract-api#readme",
   "dependencies": {
+    "busboy": "^0.3.1",
     "csv": "^5.3.2",
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
+    "eslint": "^7.0.0",
     "jest": "^26.0.1"
   },
   "jest": {
