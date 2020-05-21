@@ -2,6 +2,9 @@ service: asu-cic-textract-api
 
 frameworkVersion: '>=1.65.0 <2.0.0'
 
+custom:
+  BUCKET_FOR_BILLS: ${self:service}-${self:provider.stage}-bills
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -11,10 +14,11 @@ provider:
   deploymentBucket:
     maxPreviousDeploymentArtifacts: 10
     blockPublicAccess: true
+    serverSideEncryption: AES256
 
   environment:
     API_KEYS: apikey1, apikey2
-    BUCKET_FOR_BILLS: ${self:service}-${self:provider.stage}-bills
+    BUCKET_FOR_BILLS: ${self:custom.BUCKET_FOR_BILLS}
 
   resources:
     Resources:
@@ -31,7 +35,18 @@ provider:
       BillsBucket:
         Type: AWS::S3::Bucket
         Properties:
-          BucketName: ${self:provider.environment.BUCKET_FOR_BILLS}
+          BucketName: ${self:custom.BUCKET_FOR_BILLS}
+          AccessControl: Private
+          BucketEncryption:
+            ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
+          LifecycleConfiguration:
+            Rules:
+              -
+                ExpirationInDays: 14
+                Prefix: '/'
+                Status: Enabled
 
   #apiGateway:
     #binaryMediaTypes:
