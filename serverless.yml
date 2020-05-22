@@ -7,46 +7,56 @@ custom:
 
 provider:
   name: aws
+  region: us-east-2
   runtime: nodejs12.x
   timeout: 30
   memorySize: 256
-  region: us-east-2
   deploymentBucket:
     maxPreviousDeploymentArtifacts: 10
     blockPublicAccess: true
     serverSideEncryption: AES256
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+      - "s3:PutObject"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - ${self:custom.BUCKET_FOR_BILLS}
+            - "/*"
 
   environment:
     API_KEYS: apikey1, apikey2
     BUCKET_FOR_BILLS: ${self:custom.BUCKET_FOR_BILLS}
 
-  resources:
-    Resources:
-      GatewayResponseDefault4XX:
-        Type: 'AWS::ApiGateway::GatewayResponse'
-        Properties:
-          ResponseParameters:
-            gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-            gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-          ResponseType: DEFAULT_4XX
-          RestApiId:
-            Ref: 'ApiGatewayRestApi'
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
 
-      BillsBucket:
-        Type: AWS::S3::Bucket
-        Properties:
-          BucketName: ${self:custom.BUCKET_FOR_BILLS}
-          AccessControl: Private
-          BucketEncryption:
-            ServerSideEncryptionConfiguration:
-              - ServerSideEncryptionByDefault:
-                  SSEAlgorithm: AES256
-          LifecycleConfiguration:
-            Rules:
-              -
-                ExpirationInDays: 14
-                Prefix: '/'
-                Status: Enabled
+    BillsBucket:
+      Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
+      Properties:
+        BucketName: ${self:custom.BUCKET_FOR_BILLS}
+        AccessControl: Private
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        LifecycleConfiguration:
+          Rules:
+            -
+              ExpirationInDays: 14
+              Status: Enabled
 
   #apiGateway:
     #binaryMediaTypes:
