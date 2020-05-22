@@ -20,28 +20,33 @@ module.exports.process = async (event) => {
     }
 
     const requestID = `${new Date().getTime()}_${uniqid()}`;
+    console.log('requestID', requestID);
+
+    // validate and save the file
     const bill = await upload(event, requestID);
 
     if (!bill) {
       return respond(415, 'Unsupported Media Type');
     }
 
+    // perform OCR on file
     const ocr = await callTextract(bill, requestID);
     console.log(ocr);
 
     if (!ocr) {
-      return respond(422, 'Unprocessable Entity');
+      return respond(502, 'Bad Gateway (data extraction cannot be performed)');
     }
 
+    // handle extracted data
     const processed = await processBill(ocr);
 
     if (!processed) {
-      return respond(502, 'Problem processing bill after OCR');
+      return respond(500, 'Internal Server Error (extracted data cannot be processed)');
     }
 
-    return respond(200, ocr);
+    return respond(200, processed);
   } catch (e) {
     console.log(e);
-    return respond(500, 'Server Error');
+    return respond(500, 'Internal Server Error');
   }
 };
