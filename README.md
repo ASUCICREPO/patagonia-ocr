@@ -1,17 +1,16 @@
-ASU CIC Textract API
-===
+# ASU CIC Textract API
 
 This repo uses Serverless framework for deployment of a Serverless service
 into an AWS account.
 
-Setup
----
+## Setup
+
 `npm i`
 
 `export AWS_PROFILE=asuCicProfile`
 
-Test
----
+## Test
+
 - Lint code to check syntax and enforce style
 
 `npm run lint`
@@ -20,23 +19,20 @@ Test
 
 `npm run test`
 
-Deployment
----
+## Deployment
+
 Deploy the Lambda function
 
 `serverless deploy`
 
-
-API DOCUMENTATION
-===
+# API DOCUMENTATION
 
 This API has a single endpoint accepts a POST image or document which may be an
 image (PNG / JPG) or a document (PDF). It runs it through Amazon Textract to identify
 if it is a Driver's License, or a Utility Bill, then find any needed keys that Textract
 missed, and return an output.
 
-Responses and Errors
----
+## Responses and Errors
 
 This is a sample response when POSTing a Driver's License image:
 
@@ -68,4 +64,10 @@ This is a sample response when POSTing a Utility Bill document:
   "bill_date": "5/21/2020",
   "account_number": "765412764921"
 }
+```
+
+## Serverless local execution
+
+```bash
+serverless invoke local -f process-bill -p ./_samples/data/billUpload.json
 ```
