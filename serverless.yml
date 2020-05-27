@@ -11,7 +11,7 @@ provider:
   region: us-east-2
   runtime: nodejs12.x
   timeout: 30
-  memorySize: 256
+  memorySize: 1024
 
   deploymentBucket:
     maxPreviousDeploymentArtifacts: 10
@@ -35,6 +35,8 @@ provider:
       Action:
         - "textract:StartDocumentTextDetection"
         - "textract:GetDocumentTextDetection"
+        - "textract:DetectDocumentText"
+        - "textract:AnalyzeDocument"
       Resource: "*"
 
   environment:

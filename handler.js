@@ -8,6 +8,7 @@ const uniqid = require('uniqid');
 const authorize = require('./lib/authorizer');
 const upload = require('./lib/uploader');
 const callTextract = require('./lib/textractCaller');
+const callTextractSync = require('./lib/textractCallerSync');
 const processBill = require('./lib/billProcessor');
 const respond = require('./lib/responder');
 
@@ -30,7 +31,8 @@ module.exports.process = async (event) => {
     }
 
     // perform OCR on file
-    const ocr = await callTextract(bill, requestID);
+    //const ocr = await callTextract(bill, requestID);
+    const ocr = await callTextractSync(bill, requestID);
     console.log(ocr);
 
     if (!ocr) {
