@@ -12,12 +12,6 @@ const processBill = require('./lib/billProcessor');
 const respond = require('./lib/responder');
 
 module.exports.process = async (event) => {
-  console.log(
-    `ENVIRONMENT VARIABLES
-    ${JSON.stringify(process.env, null, 2)}`
-  );
-  console.info(`EVENT
-  ${JSON.stringify(event, null, 2)}`);
   try {
     const proceed = authorize(event);
 
