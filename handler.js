@@ -8,7 +8,7 @@ const uniqid = require('uniqid');
 const authorize = require('./lib/authorizer');
 const upload = require('./lib/uploader');
 const callTextract = require('./lib/textractCaller');
-const callTextractSync = require('./lib/textractCallerSync');
+// const callTextractSync = require('./lib/textractCallerSync');
 const processBill = require('./lib/billProcessor');
 const saveResult = require('./lib/resultSaver');
 const respond = require('./lib/responder');
@@ -32,8 +32,8 @@ module.exports.process = async (event) => {
     }
 
     // perform OCR on file
-    //const ocr = await callTextract(bill, requestID);
-    const ocr = await callTextractSync(bill, requestID);
+    const ocr = await callTextract(bill, requestID);
+    // const ocr = await callTextractSync(bill, requestID);
     console.log(ocr);
 
     if (!ocr) {
@@ -46,16 +46,16 @@ module.exports.process = async (event) => {
     if (!processed) {
       return respond(
         500,
-        'Extracted data cannot be processed'
+        'Extracted data cannot be processed',
       );
     }
 
     const saved = await saveResult(processed);
 
-    if(!saved) {
+    if (!saved) {
       return respond(
         500,
-        'Processed data cannot be saved'
+        'Processed data cannot be saved',
       );
     }
 
