@@ -41,7 +41,7 @@ module.exports.process = async (event) => {
     }
 
     // handle extracted data
-    const processed = await processBill(ocr);
+    const processed = await processBill(ocr.keyValues, ocr.rawText);
 
     if (!processed) {
       return respond(
@@ -61,7 +61,7 @@ module.exports.process = async (event) => {
 
     return respond(200, saved.keyValues);
   } catch (e) {
-    console.log(e);
+    console.log('ERROR', e);
     return respond(500, 'Internal Server Error');
   }
 };
