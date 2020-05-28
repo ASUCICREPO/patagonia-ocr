@@ -1,0 +1,16 @@
+- textract timeouts api gateway issue
+- write tests for:
+
+  * textractcaller
+  * postparser
+  * uploader
+  * handler
+  * billtypes
+  * resultsaver
+
+- main try-catch block: better handling and error codes
+
+before delivery
+===
+- limit iamRoleStatements permissions to minimum
+- remove comments, check
