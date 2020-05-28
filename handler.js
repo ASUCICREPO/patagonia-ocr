@@ -10,6 +10,7 @@ const upload = require('./lib/uploader');
 const callTextract = require('./lib/textractCaller');
 const callTextractSync = require('./lib/textractCallerSync');
 const processBill = require('./lib/billProcessor');
+const saveResult = require('./lib/resultSaver');
 const respond = require('./lib/responder');
 
 module.exports.process = async (event) => {
@@ -36,7 +37,7 @@ module.exports.process = async (event) => {
     console.log(ocr);
 
     if (!ocr) {
-      return respond(502, 'Bad Gateway (data extraction cannot be performed)');
+      return respond(502, 'Data extraction cannot be performed');
     }
 
     // handle extracted data
@@ -45,11 +46,20 @@ module.exports.process = async (event) => {
     if (!processed) {
       return respond(
         500,
-        'Internal Server Error (extracted data cannot be processed)'
+        'Extracted data cannot be processed'
       );
     }
 
-    return respond(200, processed);
+    const saved = await saveResult(processed);
+
+    if(!saved) {
+      return respond(
+        500,
+        'Processed data cannot be saved'
+      );
+    }
+
+    return respond(200, saved.keyValues);
   } catch (e) {
     console.log(e);
     return respond(500, 'Internal Server Error');
