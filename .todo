@@ -14,8 +14,10 @@
   * billtypes
   * resultsaver
 
+- review all requirements are met
 
 before delivery
 ===
+- document API
 - limit iamRoleStatements permissions to minimum
 - remove console.log, improve comments

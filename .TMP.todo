@@ -2,13 +2,12 @@
 - write tests for:
 
   * textractcaller
+  * textractmapper inner methods
   * postparser
   * uploader
   * handler
-  * billtypes
-  * resultsaver
-
-- main try-catch block: better handling and error codes
+  * documentTypes
+  * resultSaver
 
 before delivery
 ===

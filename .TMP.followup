@@ -1,5 +1,8 @@
 - full name splitting into first_name + last_name may not be accurate
-  for bills and for drivers licenses
+- also there's the case of multiple customers names in a bill
+  ('John Doe or Jane Doe')
+- do we need to normalize bill amounts and bill dates formats across bill types?
+  ('05/01/20' vs '05/07/2020' vs 'May 8, 2020', and '$33.72' vs '$ 214.00')
 
 - (S3 lifecycle uploads deletion after 2 weeks? personal information)
 

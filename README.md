@@ -1,7 +1,9 @@
 # ASU CIC Textract API
 
 This repo uses Serverless framework for deployment of a Serverless service
-into an AWS account.
+into an AWS account. The service receives a file in a multipart/form-data POST
+payload, validates and converts it if necessary, uploads it to S3, calls AWS
+Textract service, maps its output, saves it to S3 and responds the HTTP request.
 
 ## Setup
 
