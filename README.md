@@ -52,7 +52,7 @@ This is a sample response when POSTing a Utility Bill document:
 
 ```
 {
-  "bill_type": "Southwest Gas",
+  "type": "APS",
   "first_name": "John",
   "last_name": "Deacon",
   "street_address_line_1": "1801 W JEFFERSON ST",
@@ -63,6 +63,21 @@ This is a sample response when POSTing a Utility Bill document:
   "bill_amount": "$941.02",
   "bill_date": "5/21/2020",
   "account_number": "765412764921"
+}
+```
+
+And this is a sample response when POSTing a Driver License document:
+
+```
+{
+  "type": "AZDL",
+  "first_name": "John",
+  "last_name": "Deacon",
+  "street_address_line_1": "1801 W JEFFERSON ST",
+  "street_address_line_2": "",
+  "city": "Phoenix",
+  "state": "AZ",
+  "zip_code": "85001-3289",
 }
 ```
 

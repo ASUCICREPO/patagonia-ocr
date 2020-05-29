@@ -3,8 +3,8 @@ service: asu-cic-textract-api
 frameworkVersion: '>=1.65.0 <2.0.0'
 
 custom:
-  BUCKET_FOR_BILLS: ${self:service}-${self:provider.stage}-bills
-  BUCKET_FOR_BILLS_REGION: ${self:provider.region}
+  BUCKET_FOR_DOCUMENTS: ${self:service}-${self:provider.stage}-bills
+  BUCKET_FOR_DOCUMENTS_REGION: ${self:provider.region}
 
 provider:
   name: aws
@@ -28,7 +28,7 @@ provider:
         Fn::Join:
           - ""
           - - "arn:aws:s3:::"
-            - ${self:custom.BUCKET_FOR_BILLS}
+            - ${self:custom.BUCKET_FOR_DOCUMENTS}
             - "/*"
 
     - Effect: "Allow"
@@ -40,8 +40,8 @@ provider:
 
   environment:
     API_KEYS: apikey1,apikey2
-    BUCKET_FOR_BILLS: ${self:custom.BUCKET_FOR_BILLS}
-    BUCKET_FOR_BILLS_REGION: ${self:custom.BUCKET_FOR_BILLS_REGION}
+    BUCKET_FOR_DOCUMENTS: ${self:custom.BUCKET_FOR_DOCUMENTS}
+    BUCKET_FOR_DOCUMENTS_REGION: ${self:custom.BUCKET_FOR_DOCUMENTS_REGION}
 
   apiGateway:
       binaryMediaTypes:
@@ -63,7 +63,7 @@ resources:
       Type: AWS::S3::Bucket
       DeletionPolicy: Retain
       Properties:
-        BucketName: ${self:custom.BUCKET_FOR_BILLS}
+        BucketName: ${self:custom.BUCKET_FOR_DOCUMENTS}
         AccessControl: Private
         BucketEncryption:
           ServerSideEncryptionConfiguration:

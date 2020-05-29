@@ -1,0 +1,19 @@
+- logic for all bill types, extract all required fields
+- resultSaver encode .csv vs .txt s3 Body content
+
+- textract timeouts api gateway issue on ASYNC calls, convert pdf to image?
+
+- write tests for:
+
+  * textractcaller
+  * postparser
+  * uploader
+  * handler
+  * billtypes
+  * resultsaver
+
+
+before delivery
+===
+- limit iamRoleStatements permissions to minimum
+- remove console.log, improve comments

@@ -1,67 +1,54 @@
-/*
-
-https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Textract.html
-https://docs.aws.amazon.com/textract/latest/dg/api-async.html
-*/
 const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
 const upload = require('./lib/uploader');
-const callTextract = require('./lib/textractCaller');
-// const callTextractSync = require('./lib/textractCallerSync');
-const processBill = require('./lib/billProcessor');
+const callTextractAsync = require('./lib/textractCallerAsync');
+const callTextractSync = require('./lib/textractCallerSync');
+const processDocument = require('./lib/documentProcessor');
 const saveResult = require('./lib/resultSaver');
 const respond = require('./lib/responder');
 
 module.exports.process = async (event) => {
   try {
-    const proceed = authorize(event);
-
-    if (!proceed) {
-      return respond(401, 'Unauthorized');
-    }
+    authorize(event);
 
     const requestID = `${new Date().getTime()}_${uniqid()}`;
     console.log('requestID', requestID);
 
     // validate and save the file
-    const bill = await upload(event, requestID);
-
-    if (!bill) {
-      return respond(415, 'Unsupported Media Type');
-    }
+    const object = await upload(event, requestID);
 
     // perform OCR on file
-    const ocr = await callTextract(bill, requestID);
-    // const ocr = await callTextractSync(bill, requestID);
+    let ocr;
+    if (object.type === 'application/pdf') {
+      ocr = await callTextractAsync(object.key, requestID);
+    } else {
+      ocr = await callTextractSync(object.key, requestID);
+    }
     console.log(ocr);
 
-    if (!ocr) {
-      return respond(502, 'Data extraction cannot be performed');
-    }
-
     // handle extracted data
-    const processed = await processBill(ocr.keyValues, ocr.rawText);
+    const processed = await processDocument(ocr.keyValues, ocr.rawText);
 
-    if (!processed) {
-      return respond(
-        500,
-        'Extracted data cannot be processed',
-      );
-    }
+    // save extracted data
+    await saveResult(processed);
 
-    const saved = await saveResult(processed);
-
-    if (!saved) {
-      return respond(
-        500,
-        'Processed data cannot be saved',
-      );
-    }
-
-    return respond(200, saved.keyValues);
+    return respond(200, processed.keyValues);
   } catch (e) {
     console.log('ERROR', e);
-    return respond(500, 'Internal Server Error');
+
+    switch (e.statusCode) {
+      case 400: // Bad Request
+      case 401: // Unauthorized
+      case 413: // Payload Too Large
+      case 415: // Unsupported Media Type
+      case 422: // Unprocessable Entity
+      case 501: // Not Implemented
+      case 504: // Gateway Timeout
+        return respond(e.statusCode, e.message);
+
+      default:
+        return respond(500, 'Internal Server Error');
+    }
   }
 };
