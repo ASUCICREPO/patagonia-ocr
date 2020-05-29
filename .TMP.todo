@@ -1,4 +1,5 @@
 - textract timeouts api gateway issue
+- response should let the client know which fields could not be extracted
 - write tests for:
 
   * textractcaller
