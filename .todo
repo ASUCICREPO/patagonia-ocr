@@ -1,7 +1,9 @@
-- logic for all bill types, extract all required fields
-- resultSaver encode .csv vs .txt s3 Body content
-
 - textract timeouts api gateway issue on ASYNC calls, convert pdf to image?
+- logic for remaining bill types, extract all required fields:
+
+	* Southwest Gas
+  * SRP
+	* City of Phoenix Water
 
 - write tests for:
 

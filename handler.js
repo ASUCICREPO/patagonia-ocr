@@ -25,13 +25,13 @@ module.exports.process = async (event) => {
     } else {
       ocr = await callTextractSync(object.key, requestID);
     }
-    console.log(ocr);
+    console.log('OCR', ocr);
 
     // handle extracted data
     const processed = await processDocument(ocr.keyValues, ocr.rawText);
 
     // save extracted data
-    await saveResult(processed);
+    await saveResult(processed, requestID);
 
     return respond(200, processed.keyValues);
   } catch (e) {
