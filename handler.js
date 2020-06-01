@@ -13,7 +13,7 @@ module.exports.process = async (event) => {
     authorize(event);
 
     const requestID = `${new Date().getTime()}_${uniqid()}`;
-    console.log('requestID', requestID);
+    console.log('requestID', requestID, event);
 
     // validate and save the file
     const object = await upload(event, requestID);

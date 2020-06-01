@@ -14,19 +14,19 @@ File posted can be any `PNG / JPG / HEIC` image or a `PDF` document.
 
 ##### Utility Bills
 
-- **APS**
-- **Southwest Gas**
-- **APS**
-- **City of Phoenix Water**
+- APS
+- Southwest Gas
+- APS
+- City of Phoenix Water
 
 ##### Others
 - Arizona Driver license
 
-### Example Request
+### Example Request `POST /ocr`
 ```
-curl --location --request POST 'https://hf1arpd9fg.execute-api.us-east-2.amazonaws.com/dev/ocr' \
+curl --location --request POST 'BASE_URL/ocr' \
 --header 'x-api-key: someapikey1' \
---form 'file=@/path/to/some/Southwest Gas Bill Feb2020.pdf'
+--form 'file=@/path/to/some/bill.pdf'
 ```
 ### Successful Responses
 
@@ -70,21 +70,23 @@ curl --location --request POST 'https://hf1arpd9fg.execute-api.us-east-2.amazona
 These are the possible HTTP status error responses
 
 
-- HTTP 400 Bad Request => No `file` was provided in the POST payload.
+- HTTP 400 _Bad Request_ => No `file` was provided in the POST payload.
 
-- HTTP 401 Unauthorized => No valid `x-api-key` header was provided in the POST request.
+- HTTP 401 _Unauthorized_ => No valid `x-api-key` header was provided in the POST request.
 
-- HTTP 413 Payload Too Large => Provided `file` was found to be over the size limit.
+- HTTP 413 _Payload Too Large_ => Provided `file` was found to be over the size limit.
 
-- HTTP 415 Unsupported Media Type => Provided `file` was found to be of an invalid type.
+- HTTP 415 _Unsupported Media Type_ => Provided `file` was found to be of an invalid type.
 
-- HTTP 422 Unprocessable Entity => Provided `file` could not be processed by the AWS Textract
+- HTTP 422 _Unprocessable Entity_ => Provided `file` could not be processed by _AWS Textract_.
 
-- HTTP 501 Not Implemented =>  Provided `file` could not be identified as a known bill or driver license.
 
-- HTTP 504 Gateway Timeout => OCR process timeout out.
 
-- HTTP 500 Internal Server Error => Unknown or unexpected error. Further details in logs.
+- HTTP 501 _Not Implemented_ =>  Provided `file` could not be identified as a known document.
+
+- HTTP 504 _Gateway Timeout_ => OCR process timeout.
+
+- HTTP 500 _Internal Server Error_ => Unknown or unexpected error. (Further details in logs.)
 
 ---
 
