@@ -1,16 +1,16 @@
-- api timeout 30s when performing ASYNC calls to textract with PDFs
+- Gateway Api times out after 30s when performing ASYNC calls to Textract with PDFs
 
-- full name splitting into first_name + last_name may not be accurate
+- Full name splitting into first_name + last_name may not be accurate
 
-- also there's the case of multiple customers names in a bill
+- Also there's the case of multiple customers names in a bill
   ('John Doe or Jane Doe')
 
 - do we need to normalize bill amounts and bill dates formats across bill types?
   ('05/01/20' vs '05/07/2020' vs 'May 8, 2020', and '$33.72' vs '$ 214.00')
 
-- (S3 lifecycle uploads deletion after 2 weeks? personal information)
+- S3 lifecycle uploads deletion after 2 weeks? personal information issues
 
-- (textract may extract some faulty dates or words, already found these:
+- Textract may extract some faulty dates or words, already found these:
     * 7/2/2019 => 712/2019
     *      API => AP|
 
