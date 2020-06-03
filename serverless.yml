@@ -1,4 +1,4 @@
-service: asu-cic-textract-api
+service: asu-cic-textract-api-training
 
 frameworkVersion: '>=1.65.0 <2.0.0'
 
