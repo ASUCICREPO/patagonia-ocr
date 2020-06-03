@@ -28,7 +28,7 @@ module.exports.process = async (event) => {
     console.log('OCR', ocr);
 
     // handle extracted data
-    const processed = await processDocument(ocr.keyValues, ocr.rawText);
+    const processed = processDocument(ocr.keyValues, ocr.rawText);
 
     // save extracted data
     await saveResult(processed, requestID);
