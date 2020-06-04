@@ -95,7 +95,7 @@ package:
 
 functions:
 
-  process-bill:
+  process-document:
     handler: handler.process
     events:
       - http:

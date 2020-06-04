@@ -9,33 +9,64 @@ const saveResult = require('./lib/resultSaver');
 const respond = require('./lib/responder');
 
 module.exports.process = async (event) => {
+  const qs = event.queryStringParameters;
+  const debug = qs && Object.hasOwnProperty.call(qs, 'debug');
+
+  let object;
+  let ocr;
+  let processed;
+
   try {
     authorize(event);
 
     const requestID = `${new Date().getTime()}_${uniqid()}`;
-    console.log('requestID', requestID, event);
+    console.log('requestID', requestID);
+    // console.log('event', event);
 
     // validate and save the file
-    const object = await upload(event, requestID);
+    object = await upload(event, requestID);
 
     // perform OCR on file
-    let ocr;
     if (object.type === 'application/pdf') {
       ocr = await callTextractAsync(object.key, requestID);
     } else {
       ocr = await callTextractSync(object.key, requestID);
     }
-    console.log('OCR', ocr);
+    // console.log('OCR', ocr);
 
     // handle extracted data
-    const processed = processDocument(ocr.keyValues, ocr.rawText);
+    processed = processDocument(ocr.keyValues, ocr.rawText);
 
     // save extracted data
     await saveResult(processed, requestID);
 
-    return respond(200, processed.keyValues);
+    // respond the request
+    let output = processed.extracted;
+    if (debug) {
+      console.log('Debug successful response');
+      output = {
+        object,
+        ocr,
+        processed,
+      };
+    }
+
+    return respond(200, output);
   } catch (e) {
-    console.log('ERROR', e);
+    console.error(e);
+
+    if (debug) {
+      console.log('Debug error response');
+      return respond(e.statusCode, {
+        statusCode: e.statusCode,
+        message: e.message,
+        debug: {
+          object,
+          ocr,
+          processed,
+        },
+      });
+    }
 
     switch (e.statusCode) {
       case 400: // Bad Request
