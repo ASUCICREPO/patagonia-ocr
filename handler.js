@@ -1,7 +1,7 @@
 const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
-const { upload, uploadExtracted } = require('./lib/uploader');
+const { upload, uploadDebug } = require('./lib/uploader');
 const callTextractAsync = require('./lib/textractCallerAsync');
 const callTextractSync = require('./lib/textractCallerSync');
 const mapTextractOutput = require('./lib/textractMapper');
@@ -13,6 +13,8 @@ module.exports.process = async (event) => {
   const qs = event.queryStringParameters || {};
   const debug = Object.hasOwnProperty.call(qs, 'debug');
 
+  const requestId = `${new Date().getTime()}_${uniqid()}`;
+  console.log('requestId', requestId);
   let response = [];
 
   let object = {};
@@ -20,14 +22,13 @@ module.exports.process = async (event) => {
   let mapped = {};
   let processed = {};
 
+
   try {
     authorize(event);
 
-    const requestId = `${new Date().getTime()}_${uniqid()}`;
-    console.log('requestId', requestId);
     if (debug) {
       console.log('DEBUG mode');
-      console.log('event', event);
+      await uploadDebug(`${requestId}/event.json`, JSON.stringify(event));
     }
 
     // validate and save the file
@@ -41,7 +42,7 @@ module.exports.process = async (event) => {
     }
 
     if (debug) {
-      await uploadExtracted(extracted, requestId);
+      await uploadDebug(`${requestId}/textract_output.json`, JSON.stringify(extracted));
     }
 
     // map extracted data
