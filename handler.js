@@ -58,6 +58,7 @@ module.exports.process = async (event) => {
     let output = processed.extracted;
     if (debug) {
       output = {
+        requestId,
         object,
         extracted,
         mapped,
@@ -88,8 +89,10 @@ module.exports.process = async (event) => {
     if (debug) {
       response = [e.statusCode, {
         statusCode: e.statusCode,
+        object,
         message: e.message,
         debug: {
+          requestId,
           object,
           extracted,
           mapped,
