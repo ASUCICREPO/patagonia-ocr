@@ -1,73 +1,74 @@
 const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
-const upload = require('./lib/uploader');
+const { upload, uploadExtracted } = require('./lib/uploader');
 const callTextractAsync = require('./lib/textractCallerAsync');
 const callTextractSync = require('./lib/textractCallerSync');
+const mapTextractOutput = require('./lib/textractMapper');
 const processDocument = require('./lib/documentProcessor');
 const saveResult = require('./lib/resultSaver');
 const respond = require('./lib/responder');
 
 module.exports.process = async (event) => {
-  const qs = event.queryStringParameters;
-  const debug = qs && Object.hasOwnProperty.call(qs, 'debug');
+  const qs = event.queryStringParameters || {};
+  const debug = Object.hasOwnProperty.call(qs, 'debug');
 
-  let object;
-  let ocr;
-  let processed;
+  let response = [];
+
+  let object = {};
+  let extracted = {};
+  let mapped = {};
+  let processed = {};
 
   try {
     authorize(event);
 
-    const requestID = `${new Date().getTime()}_${uniqid()}`;
-    console.log('requestID', requestID);
-    // console.log('event', event);
+    const requestId = `${new Date().getTime()}_${uniqid()}`;
+    console.log('requestId', requestId);
+    if (debug) {
+      console.log('DEBUG mode');
+      console.log('event', event);
+    }
 
     // validate and save the file
-    object = await upload(event, requestID);
+    object = await upload(event, requestId);
 
     // perform OCR on file
     if (object.type === 'application/pdf') {
-      ocr = await callTextractAsync(object.key, requestID);
+      extracted = await callTextractAsync(object.key);
     } else {
-      ocr = await callTextractSync(object.key, requestID);
+      extracted = await callTextractSync(object.key);
     }
-    // console.log('OCR', ocr);
 
-    // handle extracted data
-    processed = processDocument(ocr.keyValues, ocr.rawText);
+    if (debug) {
+      await uploadExtracted(extracted, requestId);
+    }
 
-    // save extracted data
-    await saveResult(processed, requestID);
+    // map extracted data
+    mapped = mapTextractOutput(extracted);
 
-    // respond the request
+    // augment and select data for known documentTypes
+    processed = processDocument(mapped.keyValues, mapped.rawText);
+
+    // save processed data
+    await saveResult(processed, requestId);
+
+    // respond the request with SUCCESS
     let output = processed.extracted;
     if (debug) {
-      console.log('Debug successful response');
       output = {
         object,
-        ocr,
+        extracted,
+        mapped,
         processed,
       };
     }
-
-    return respond(200, output);
+    response = [200, output];
+    console.log('requestId', requestId, 'SUCCESS');
   } catch (e) {
-    console.error(e);
+    console.error(e); // log all catched errors
 
-    if (debug) {
-      console.log('Debug error response');
-      return respond(e.statusCode, {
-        statusCode: e.statusCode,
-        message: e.message,
-        debug: {
-          object,
-          ocr,
-          processed,
-        },
-      });
-    }
-
+    // respond the request with a registered ERROR
     switch (e.statusCode) {
       case 400: // Bad Request
       case 401: // Unauthorized
@@ -76,10 +77,27 @@ module.exports.process = async (event) => {
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
       case 504: // Gateway Timeout
-        return respond(e.statusCode, e.message);
+        response = [e.statusCode, e.message];
+        break;
 
       default:
-        return respond(500, 'Internal Server Error');
+        response = [500, 'Internal Server Error'];
     }
+
+    if (debug) {
+      response = [e.statusCode, {
+        statusCode: e.statusCode,
+        message: e.message,
+        debug: {
+          object,
+          extracted,
+          mapped,
+          processed,
+        },
+      }];
+    }
+    console.log('requestId', requestId, 'ERROR');
   }
+
+  return respond(response);
 };
