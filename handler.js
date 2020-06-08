@@ -6,6 +6,7 @@ const callTextractAsync = require('./lib/textractCallerAsync');
 const callTextractSync = require('./lib/textractCallerSync');
 const mapTextractOutput = require('./lib/textractMapper');
 const processDocument = require('./lib/documentProcessor');
+const validateProcessed = require('./lib/processedValidator');
 const saveResult = require('./lib/resultSaver');
 const respond = require('./lib/responder');
 
@@ -21,7 +22,7 @@ module.exports.process = async (event) => {
   let extracted = {};
   let mapped = {};
   let processed = {};
-
+  let validated = {};
 
   try {
     authorize(event);
@@ -51,11 +52,14 @@ module.exports.process = async (event) => {
     // augment and select data for known documentTypes
     processed = processDocument(mapped.keyValues, mapped.rawText);
 
-    // save processed data
-    await saveResult(processed, requestId);
+    // validate processed data
+    validated = validateProcessed(processed.extracted);
+
+    // save validated data
+    await saveResult(validated, requestId);
 
     // respond the request with SUCCESS
-    let output = processed.extracted;
+    let output = validated;
     if (debug) {
       output = {
         requestId,
@@ -63,6 +67,7 @@ module.exports.process = async (event) => {
         extracted,
         mapped,
         processed,
+        validated,
       };
     }
     response = [200, output];
@@ -97,6 +102,7 @@ module.exports.process = async (event) => {
           extracted,
           mapped,
           processed,
+          validated,
         },
       }];
     }
