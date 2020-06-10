@@ -139,7 +139,6 @@ module.exports.process = async (event) => {
 };
 
 module.exports.retrieve = async (event) => {
-
   const params = event.pathParameters || {};
   const { requestId } = params;
 
