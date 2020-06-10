@@ -1,0 +1,23 @@
+# Do not change version. This is the version of aws buildspec, not the version of your buldspec file.
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12  
+    commands:
+      - echo Installing serverless...
+      - npm i -g serverless
+  # pre_build:
+  #   commands:
+  #     - npm install -s dev
+  build:
+    commands:
+      - echo Build started on `date`
+      - npm install -s dev
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - serverless deploy --verbose
+
+
