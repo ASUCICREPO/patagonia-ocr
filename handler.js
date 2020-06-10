@@ -45,13 +45,13 @@ const postExtraction = async (requestId) => {
   return validated;
 };
 
-
 module.exports.process = async (event) => {
   const qs = event.queryStringParameters || {};
   debug = Object.hasOwnProperty.call(qs, 'debug');
 
   if (event.Records && event.Records.length && event.Records[0].Sns) {
     // Resume async execution of the process (invoked from SNS notification event)
+    // after Textract async PDF analysis is finished
     const snsData = JSON.parse(event.Records[0].Sns.Message);
     resumeAsync = { req: snsData.JobTag, job: snsData.JobId };
   }
@@ -76,19 +76,21 @@ module.exports.process = async (event) => {
       if (object.type === 'application/pdf') {
         // perform OCR on PDF file *async execution to be continued
         await callTextractAsync(object.key, requestId);
+        metadata.status = 'PENDING';
         response = [200, { requestId }];
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
         validated = await postExtraction(requestId);
+        metadata.status = 'SUCCEEDED';
         response = [200, validated];
       }
     } else {
       // continued async execution
-      console.log('Resuming execution for requestId', requestId);
+      console.log('Resuming async execution', requestId);
       extracted = await retrieveTextractResults(resumeAsync.job);
       validated = await postExtraction(requestId);
-      console.log(extracted);
+      metadata.status = 'SUCCEEDED';
       response = [200, validated];
     }
     console.log('SUCCESS requestId', requestId);
@@ -101,9 +103,8 @@ module.exports.process = async (event) => {
       case 401: // Unauthorized
       case 413: // Payload Too Large
       case 415: // Unsupported Media Type
-      case 422: // Unprocessable Entity
       case 501: // Not Implemented
-      case 504: // Gateway Timeout
+        metadata.status = 'FAILED';
         response = [e.statusCode, {
           statusCode: e.statusCode,
           message: e.message,
@@ -111,6 +112,7 @@ module.exports.process = async (event) => {
         break;
 
       default:
+        metadata.status = 'FAILED';
         response = [500, {
           statusCode: 500,
           message: 'Internal Server Error',
@@ -148,10 +150,45 @@ module.exports.retrieve = async (event) => {
 
   try {
     const result = await retrieveResult(requestId);
+    metadata.status = 'SUCCEEDED';
     response = [200, result];
   } catch (e) {
     console.error(e);
-    response = [404, 'Not Found'];
+
+    // respond the request with a registered ERROR
+    switch (e.statusCode) {
+      case 202: // Accepted
+        metadata.status = 'PENDING';
+        response = [e.statusCode, {
+          statusCode: e.statusCode,
+          message: 'Accepted',
+        }];
+        break;
+
+      case 403: // Forbidden
+      case 404: // Not Found
+        metadata.status = 'NOT_FOUND';
+        response = [e.statusCode, {
+          statusCode: e.statusCode,
+          message: 'Not Found',
+        }];
+        break;
+
+      case 422: // Unprocessable Entity
+        metadata.status = 'FAILED';
+        response = [e.statusCode, {
+          statusCode: e.statusCode,
+          message: e.message,
+        }];
+        break;
+
+      default:
+        metadata.status = 'FAILED';
+        response = [500, {
+          statusCode: 500,
+          message: 'Internal Server Error',
+        }];
+    }
   }
 
   response[1] = {

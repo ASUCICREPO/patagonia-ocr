@@ -1,14 +1,7 @@
 To do
 ===
-- csv first line column names
 
-1- textract timeouts api gateway issue
-  some alternatives:
-  - for PDFs, call should be split into 2 requests because of ASYNC Textract API
-  - PDF to image conversion before Textract SYNC call (see Lambda Layer with ImageMagick, etc)
-  (- replace ApiGateway with Application Load Balancer for Lambda invokation) => payload limit?
-  (- maybe ASU-CIC team can provide some insight as a feedback from AWS's Textract Team)
-
+1- data formats normalization
 2- write more Jest tests for:
 
   * textractCaller
