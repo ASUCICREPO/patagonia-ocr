@@ -13,8 +13,9 @@ phases:
   #     - npm install -s dev
   build:
     commands:
-      - echo Build started on `date`
-      - npm install -s dev
+      - echo Build started
+      - npm install
+      - export AWS_PROFILE=asuCicProfile
   post_build:
     commands:
       - echo Build completed on `date`
