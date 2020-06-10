@@ -1,5 +1,6 @@
 To do
 ===
+- csv first line column names
 
 1- textract timeouts api gateway issue
   some alternatives:
@@ -8,11 +9,7 @@ To do
   (- replace ApiGateway with Application Load Balancer for Lambda invokation) => payload limit?
   (- maybe ASU-CIC team can provide some insight as a feedback from AWS's Textract Team)
 
-2- response should let the client know which fields could not be extracted
-  * extractor() should not fail if any fields can't be found
-  * documentProcessor should validate output fields and provide an errors array to the response
-
-3- write more Jest tests for:
+2- write more Jest tests for:
 
   * textractCaller
   * textractMapper inner methods

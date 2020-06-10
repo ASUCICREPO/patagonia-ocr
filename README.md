@@ -3,10 +3,18 @@
 This repository uses the _Serverless_ framework for deployment of a service
 into an AWS account.
 
-The API receives a single `file` in a `multipart/form-data` **POST** payload, validates
-and converts it if necessary, uploads it to S3, calls the _AWS Textract_ service,
-maps its output and parses it, saves it in an `.csv` file in an S3 bucket, and finally
-responds to the HTTP request.
+The API receives a single `file` in a `multipart/form-data` **POST** payload, validates it,
+converts it if necessary, and uploads it to S3.
+
+When the provided file is a document (`PDF`) a call is made to the _AWS Textract_ and the
+HTTP request is responded immediately with a `requestId` (later, a **GET** request can be made
+to the same endpoint to retrieve the result data after the async process is finished).
+
+The process continues asynchronously, when the _AWS Textract_ job is complete, the extracted
+data is mapped and parsed, saved in a `.csv` file in an S3 bucket.
+
+On the other side, when the provided file is an image (`PNG / JPG / HEIC`) the process is carried on synchronously,
+the result data will be available in the response.
 
 ## Currently Supported files
 
@@ -22,40 +30,59 @@ File posted can be any `PNG / JPG / HEIC` image or a `PDF` document.
 ##### Others
 - Arizona Driver license
 
-### Example Request `POST /ocr`
+
+## Request `POST /ocr`
 ```
+# Post a file to the service.
 curl --location --request POST 'BASE_URL/ocr' \
 --header 'x-api-key: apikey1' \
---form 'file=@/path/to/some/bill.pdf'
+--form 'file=@/path/to/some/bill.png'
 ```
+
 ## Successful Responses
 
 Response will have an HTTP status **200** _OK_ when successful.
 
-Additionally there may be an `errors` array in the response body, with a list of `keys`
-that could not be extracted from the uploaded `file`.
+When file is a PDF the response contains a `requestId` for the client application to
+later try and retrieve
 
-- Sample response when POST file is a Driver's License image:
+Additionally there may be an `errors` array in the response body, with a list of `keys`
+that could not be extracted from the uploaded file.
+
+- Sample response when file is a Driver's License PNG image:
 
 ```
     {
       "type": "AZDL",
       "first_name": "John",
       "last_name": "Deacon",
-      "street_address_line_1": "",
+      "street_address_line_1": "921 E Main St",
       "street_address_line_2": "",
       "city": "Phoenix",
       "state": "AZ",
       "zip_code": "85001-3289",
       "errors": [
-        "street_address_line_1",
         "street_address_line_2"
       ]
     }
 ```
 
-- Sample response when POST file is an APS Bill document:
+- Sample response when file is a PDF document:
 
+```
+    {
+      "requestId": "1591708879608_rbloj8kb7ydbsp"
+    }
+```
+
+## Request `GET /ocr/{requestId}`
+```
+# Get results from a processed PDF file.
+curl --location --request GET 'BASE_URL/ocr/1591708879608_rbloj8kb7ydbsp' \
+--header 'x-api-key: apikey1' \
+```
+
+- Sample response when source file was a PDF document and the process was successful:
 ```
     {
       "type": "APS",
@@ -71,6 +98,7 @@ that could not be extracted from the uploaded `file`.
       "account_number": "765412764921"
     }
 ```
+
 
 ## Error Responses
 
@@ -93,24 +121,16 @@ Response will have an HTTP status of **4xx** or **5xx** when an error was encoun
 
 - **415** _Unsupported Media Type_
 
-  Provided `file` was found to be of an invalid type.
+  Provided `file` was found to be of an invalid or unsupported type.
 
 
 - **422** _Unprocessable Entity_
 
   Provided `file` could not be processed by _AWS Textract_.
 
-
-
 - **501** _Not Implemented_
 
   Provided `file` could not be identified as a known document.
-
-
-- **504** _Gateway Timeout_
-
-  OCR process timeout.
-
 
 - **500** _Internal Server Error_
 

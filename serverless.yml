@@ -5,6 +5,22 @@ frameworkVersion: '>=1.65.0 <2.0.0'
 custom:
   BUCKET: ${self:service}-${self:provider.stage}-documents
   BUCKET_REGION: ${self:provider.region}
+  SNStopicName: ${self:service}-${self:provider.stage}-topic
+  SNStopicArn:
+    Fn::Join:
+      - ":"
+      - - "arn:aws:sns"
+        - Ref: "AWS::Region"
+        - Ref: "AWS::AccountId"
+        - ${self:custom.SNStopicName}
+
+  TextractRoleName: ${self:service}-${self:provider.stage}-textract-role
+  TextractRoleArn:
+    Fn::Join:
+      - ":"
+      - - "arn:aws:iam:"
+        - Ref: "AWS::AccountId"
+        - "role/${self:custom.TextractRoleName}"
 
 provider:
   name: aws
@@ -24,6 +40,7 @@ provider:
       Action:
       - "s3:GetObject"
       - "s3:PutObject"
+      - "s3:ListBucket"
       Resource:
         Fn::Join:
           - ""
@@ -37,6 +54,11 @@ provider:
         - "textract:GetDocumentAnalysis"
         - "textract:AnalyzeDocument"
       Resource: "*"
+
+    - Effect: "Allow"
+      Action:
+        - "sns:Publish"
+      Resource: ${self:custom.SNStopicArn}
 
   environment:
     API_KEYS: apikey1,apikey2
@@ -85,6 +107,42 @@ resources:
               ExpirationInDays: 14
               Status: Enabled
 
+    TextractSNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:custom.SNStopicName}
+        TopicName: ${self:custom.SNStopicName}
+
+    TextractRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.TextractRoleName}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "textract.amazonaws.com"
+                  - "lambda.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        ManagedPolicyArns:
+          - "arn:aws:iam::aws:policy/AWSLambdaExecute"
+        Policies:
+          - PolicyName: "TextractRoleAccess"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "sns:*"
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - "textract:*"
+                  Resource: "*"
+
 package:
   exclude:
     - ".*/**"
@@ -97,8 +155,23 @@ functions:
 
   process-document:
     handler: handler.process
+    environment:
+      SNS_TOPIC_ARN: ${self:custom.SNStopicArn}
+      TEXTRACT_ROLE_ARN: ${self:custom.TextractRoleArn}
     events:
       - http:
           path: ocr
           method: post
           cors: true
+      - sns:
+          arn: ${self:custom.SNStopicArn}
+          topicName: ${self:custom.SNStopicName}
+
+  retrieve-result:
+    handler: handler.retrieve
+    events:
+      - http:
+          path: ocr/{requestId}
+          method: get
+          cors: true
+
