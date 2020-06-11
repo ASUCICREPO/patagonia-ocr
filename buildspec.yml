@@ -15,10 +15,10 @@ phases:
     commands:
       - echo Build started
       - npm install
-      - export AWS_PROFILE=asuCicProfile
   post_build:
     commands:
       - echo Build completed on `date`
+      #- export AWS_PROFILE=asuCicProfile
       - serverless deploy --verbose
 
 
