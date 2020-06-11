@@ -7,6 +7,7 @@ const callTextractSync = require('./lib/textractCallerSync');
 const mapTextractOutput = require('./lib/textractMapper');
 const processDocument = require('./lib/documentProcessor');
 const validateProcessed = require('./lib/processedValidator');
+const normalizeValidated = require('./lib/validatedNormalizator');
 const { saveResult, retrieveResult } = require('./lib/resultHandler');
 const respond = require('./lib/responder');
 
@@ -20,6 +21,7 @@ let extracted = {};
 let mapped = {};
 let processed = {};
 let validated = {};
+let normalized = {};
 
 const postExtraction = async (requestId) => {
   console.log('postExtraction', extracted);
@@ -38,11 +40,13 @@ const postExtraction = async (requestId) => {
   // validate processed data
   validated = validateProcessed(processed.extracted);
 
-  // save validated data
-  const result = await saveResult(validated, requestId);
+  normalized = normalizeValidated(validated, processed.normalizer);
+
+  // save normalized data
+  const result = await saveResult(normalized, requestId);
   metadata.result = result;
 
-  return validated;
+  return normalized;
 };
 
 module.exports.process = async (event) => {
@@ -81,17 +85,17 @@ module.exports.process = async (event) => {
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
-        validated = await postExtraction(requestId);
+        normalized = await postExtraction(requestId);
         metadata.status = 'SUCCEEDED';
-        response = [200, validated];
+        response = [200, normalized];
       }
     } else {
       // continued async execution
       console.log('Resuming async execution', requestId);
       extracted = await retrieveTextractResults(resumeAsync.job);
-      validated = await postExtraction(requestId);
+      normalized = await postExtraction(requestId);
       metadata.status = 'SUCCEEDED';
-      response = [200, validated];
+      response = [200, normalized];
     }
     console.log('SUCCESS requestId', requestId);
   } catch (e) {
@@ -129,6 +133,7 @@ module.exports.process = async (event) => {
       mapped,
       processed,
       validated,
+      normalized,
     };
   }
 
