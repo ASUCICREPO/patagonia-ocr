@@ -35,8 +35,8 @@ File posted can be any `PNG / JPG / HEIC` image or a `PDF` document.
 ## Important Notes
 1- Objects stored in the S3 bucket have a lifecycle of 14 days before deletion.
 
-2- You can add `?debug` to any request made for further details on output and
-logs. Also some intermediate state of the data is saved into the S3 bucket as
+2- You can add `?debug` to any **POST** request made to view details on output
+and logs. Also some intermediate state of the data is saved into the S3 bucket as
 well when this flag is present.
 
 ---

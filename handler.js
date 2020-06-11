@@ -11,44 +11,40 @@ const normalizeValidated = require('./lib/validatedNormalizator');
 const { saveResult, retrieveResult } = require('./lib/resultHandler');
 const respond = require('./lib/responder');
 
-let debug = false;
-let response = [];
-const metadata = {};
-let resumeAsync = false;
-
-let object = {};
-let extracted = {};
-let mapped = {};
-let processed = {};
-let validated = {};
-let normalized = {};
-
-const postExtraction = async (requestId) => {
+const postExtraction = async (dataExtracted, requestId, debug = false) => {
   if (debug) {
-    console.log('postExtraction', extracted);
+    console.log('postExtraction', dataExtracted);
     // save full textract output for debugging
-    await uploadDebug(`${requestId}/textract_output.json`, JSON.stringify(extracted));
+    await uploadDebug(`${requestId}/textract_output.json`, JSON.stringify(dataExtracted));
   }
 
   // map extracted data
-  mapped = mapTextractOutput(extracted);
+  const dataMapped = mapTextractOutput(dataExtracted);
 
   // augment and select data for known documentTypes
-  processed = processDocument(mapped.keyValues, mapped.rawText);
-  metadata.type = processed.documentType;
+  const dataProcessed = processDocument(dataMapped.keyValues, dataMapped.rawText);
 
   // validate processed data
-  validated = validateProcessed(processed.extracted);
+  const dataValidated = validateProcessed(dataProcessed.extracted);
 
-  normalized = normalizeValidated(validated, processed.normalizer);
+  const dataNormalized = normalizeValidated(dataValidated, dataProcessed.normalizer);
 
   // save normalized data
-  await saveResult(normalized, requestId);
+  await saveResult(dataNormalized, requestId);
 
-  return normalized;
+  return dataNormalized;
 };
 
 module.exports.process = async (event) => {
+  let debug = false;
+  let response = [];
+  const metadata = {};
+  let resumeAsync = false;
+
+  let object = {};
+  let extracted = {};
+  let normalized = {};
+
   const qs = event.queryStringParameters || {};
   debug = Object.hasOwnProperty.call(qs, 'debug');
 
@@ -84,7 +80,7 @@ module.exports.process = async (event) => {
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
-        normalized = await postExtraction(requestId);
+        normalized = await postExtraction(extracted, requestId, debug);
         metadata.status = 'SUCCEEDED';
         response = [200, normalized];
       }
@@ -92,7 +88,7 @@ module.exports.process = async (event) => {
       // continued async execution
       console.log('Resuming async execution', requestId);
       extracted = await retrieveTextractResults(resumeAsync.job);
-      normalized = await postExtraction(requestId);
+      normalized = await postExtraction(extracted, requestId, debug);
       metadata.status = 'SUCCEEDED';
       response = [200, normalized];
     }
@@ -130,9 +126,6 @@ module.exports.process = async (event) => {
     metadata.debug = {
       object,
       extracted,
-      mapped,
-      processed,
-      validated,
       normalized,
     };
   }
@@ -145,6 +138,9 @@ module.exports.process = async (event) => {
 };
 
 module.exports.retrieve = async (event) => {
+  let response = [];
+  const metadata = {};
+
   const params = event.pathParameters || {};
   const { requestId } = params;
 
