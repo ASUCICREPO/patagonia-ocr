@@ -43,8 +43,7 @@ const postExtraction = async (requestId) => {
   normalized = normalizeValidated(validated, processed.normalizer);
 
   // save normalized data
-  const result = await saveResult(normalized, requestId);
-  metadata.result = result;
+  await saveResult(normalized, requestId);
 
   return normalized;
 };
