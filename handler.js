@@ -24,8 +24,8 @@ let validated = {};
 let normalized = {};
 
 const postExtraction = async (requestId) => {
-  console.log('postExtraction', extracted);
   if (debug) {
+    console.log('postExtraction', extracted);
     // save full textract output for debugging
     await uploadDebug(`${requestId}/textract_output.json`, JSON.stringify(extracted));
   }
@@ -124,6 +124,7 @@ module.exports.process = async (event) => {
 
     console.log('ERROR requestId', requestId);
   }
+
   // add metadata to response
   if (debug) {
     metadata.debug = {
@@ -135,7 +136,6 @@ module.exports.process = async (event) => {
       normalized,
     };
   }
-
   response[1] = {
     ...response[1],
     ...metadata,
