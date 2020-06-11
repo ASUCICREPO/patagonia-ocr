@@ -80,7 +80,7 @@ module.exports.process = async (event) => {
         // perform OCR on PDF file *async execution to be continued
         await callTextractAsync(object.key, requestId);
         metadata.status = 'PENDING';
-        response = [200, { requestId }];
+        response = [202, { requestId }];
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
@@ -96,7 +96,7 @@ module.exports.process = async (event) => {
       metadata.status = 'SUCCEEDED';
       response = [200, normalized];
     }
-    console.log('SUCCESS requestId', requestId);
+    console.log('SUCCEEDED requestId', requestId);
   } catch (e) {
     console.error(e); // log all catched errors
 
