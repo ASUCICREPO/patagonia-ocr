@@ -19,6 +19,7 @@ phases:
     commands:
       - echo Build completed on `date`
       #- export AWS_PROFILE=asuCicProfile
+      #- None funciotn
       - serverless deploy --verbose
 
 
