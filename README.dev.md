@@ -25,3 +25,5 @@ Locally run Jest tests `npm run test`
 
 Deploy the Lambda function `serverless deploy`
 
+
+[< back to main docs](./README.md)
