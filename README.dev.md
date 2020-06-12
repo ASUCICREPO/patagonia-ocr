@@ -13,7 +13,8 @@ Install Serverless Framework `npm i -g serverless`
 
 Install other development dependencies `npm i`
 
-Configure your AWS credentials `export AWS_PROFILE=asuCicProfile`
+Configure your AWS credentials for example: `export AWS_PROFILE=asuCicProfile`
+Configure your AWS region for example: `export AWS_REGION=us-east-2`
 
 ## Development & Testing
 

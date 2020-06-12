@@ -1,4 +1,4 @@
-service: asu-cic-textract-api
+service: asu-cic-ocr-api
 
 frameworkVersion: '>=1.65.0 <2.0.0'
 
@@ -24,11 +24,10 @@ custom:
 
 provider:
   name: aws
-  region: us-east-2
+  region: ${env:AWS_REGION}
   runtime: nodejs12.x
   timeout: 30
   memorySize: 1024
-  role: ${env:ROLE, ''}
 
   deploymentBucket:
     maxPreviousDeploymentArtifacts: 10
@@ -92,7 +91,7 @@ resources:
         RestApiId:
           Ref: 'ApiGatewayRestApi'
 
-    BillsBucket:
+    DocumentsBucket:
       Type: AWS::S3::Bucket
       DeletionPolicy: Retain
       Properties:
