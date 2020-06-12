@@ -152,16 +152,16 @@ module.exports.retrieve = async (event) => {
 
     console.log('result', result);
     // already processed
-    if (result) {
-      metadata.status = 'SUCCEEDED';
-      response = [200, result];
-    } else {
+    if (!result) {
       // still needs to be processed
       extracted = await getStored(requestId);
       normalized = await postExtraction(extracted, requestId);
 
       metadata.status = 'SUCCEEDED';
       response = [200, normalized];
+    } else {
+      metadata.status = 'SUCCEEDED';
+      response = [200, result];
     }
   } catch (e) {
     console.error(e);
