@@ -148,10 +148,12 @@ module.exports.retrieve = async (event) => {
     return respond([400, 'Bad Request']);
   }
 
+  metadata.requestId = requestId;
+  console.log('requestId', requestId);
+
   try {
     const result = await retrieveResult(requestId);
 
-    // already processed
     if (!result) {
       // still needs to be processed
       extracted = await getStored(requestId);
@@ -160,6 +162,7 @@ module.exports.retrieve = async (event) => {
       metadata.status = 'SUCCEEDED';
       response = [200, normalized];
     } else {
+      // already processed
       metadata.status = 'SUCCEEDED';
       response = [200, result];
     }
