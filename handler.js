@@ -1,8 +1,8 @@
 const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
-const { upload, uploadDebug } = require('./lib/uploader');
-const { callTextractAsync, retrieveTextractResults } = require('./lib/textractCallerAsync');
+const { upload, store } = require('./lib/uploader');
+const { callTextractAsync, fetchOutput, getStored } = require('./lib/textractCallerAsync');
 const callTextractSync = require('./lib/textractCallerSync');
 const mapTextractOutput = require('./lib/textractMapper');
 const processDocument = require('./lib/documentProcessor');
@@ -11,13 +11,7 @@ const normalizeValidated = require('./lib/validatedNormalizator');
 const { saveResult, retrieveResult } = require('./lib/resultHandler');
 const respond = require('./lib/responder');
 
-const postExtraction = async (dataExtracted, requestId, debug = false) => {
-  if (debug) {
-    console.log('postExtraction', dataExtracted);
-    // save full textract output for debugging
-    await uploadDebug(`${requestId}/textract_output.json`, JSON.stringify(dataExtracted));
-  }
-
+const postExtraction = async (dataExtracted, requestId) => {
   // map extracted data
   const dataMapped = mapTextractOutput(dataExtracted);
 
@@ -66,7 +60,7 @@ module.exports.process = async (event) => {
       if (debug) {
         console.log('DEBUG mode');
         // save full event for debugging
-        await uploadDebug(`${requestId}/event.json`, JSON.stringify(event));
+        await store.set(`${requestId}/event.json`, JSON.stringify(event));
       }
 
       // validate and save the file
@@ -80,17 +74,19 @@ module.exports.process = async (event) => {
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
-        normalized = await postExtraction(extracted, requestId, debug);
+        normalized = await postExtraction(extracted, requestId);
         metadata.status = 'SUCCEEDED';
         response = [200, normalized];
       }
     } else {
       // continued async execution
       console.log('Resuming async execution', requestId);
-      extracted = await retrieveTextractResults(resumeAsync.job);
-      normalized = await postExtraction(extracted, requestId, debug);
-      metadata.status = 'SUCCEEDED';
-      response = [200, normalized];
+
+      // fetch output from Textract API
+      extracted = await fetchOutput(resumeAsync.job, requestId);
+
+      // save full Textract output
+      return respond([200, {}]);
     }
     console.log('SUCCEEDED requestId', requestId);
   } catch (e) {
@@ -102,6 +98,7 @@ module.exports.process = async (event) => {
       case 401: // Unauthorized
       case 413: // Payload Too Large
       case 415: // Unsupported Media Type
+      case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata.status = 'FAILED';
         response = [e.statusCode, {
@@ -140,6 +137,8 @@ module.exports.process = async (event) => {
 module.exports.retrieve = async (event) => {
   let response = [];
   const metadata = {};
+  let extracted;
+  let normalized;
 
   const params = event.pathParameters || {};
   const { requestId } = params;
@@ -150,8 +149,20 @@ module.exports.retrieve = async (event) => {
 
   try {
     const result = await retrieveResult(requestId);
-    metadata.status = 'SUCCEEDED';
-    response = [200, result];
+
+    console.log('result', result);
+    // already processed
+    if (result) {
+      metadata.status = 'SUCCEEDED';
+      response = [200, result];
+    } else {
+      // still needs to be processed
+      extracted = await getStored(requestId);
+      normalized = await postExtraction(extracted, requestId);
+
+      metadata.status = 'SUCCEEDED';
+      response = [200, normalized];
+    }
   } catch (e) {
     console.error(e);
 
@@ -165,7 +176,6 @@ module.exports.retrieve = async (event) => {
         }];
         break;
 
-      case 403: // Forbidden
       case 404: // Not Found
         metadata.status = 'NOT_FOUND';
         response = [e.statusCode, {
@@ -174,7 +184,9 @@ module.exports.retrieve = async (event) => {
         }];
         break;
 
+      // postExtraction failed
       case 422: // Unprocessable Entity
+      case 501: // Not Implemented
         metadata.status = 'FAILED';
         response = [e.statusCode, {
           statusCode: e.statusCode,
