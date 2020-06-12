@@ -13,8 +13,9 @@ Install Serverless Framework `npm i -g serverless`
 
 Install other development dependencies `npm i`
 
-Configure your AWS credentials for example: `export AWS_PROFILE=asuCicProfile`
-Configure your AWS region for example: `export AWS_REGION=us-east-2`
+Configure AWS credentials, for example: `export AWS_PROFILE=asuCicProfile`
+Configure the AWS region, for example: `export REGION=us-east-1`
+Configure the desired S3 bucket's name, for example: `export BUCKET=asu-cic-ocr-api-dev-documents`
 
 ## Development & Testing
 
@@ -24,7 +25,7 @@ Locally run Jest tests `npm run test`
 
 ## Deployment
 
-Deploy the Lambda function `serverless deploy`
+Deploy the Lambda function `serverless deploy --stage dev`
 
 
 [< back to main docs](./README.md)
