@@ -3,8 +3,6 @@ service: asu-cic-ocr-api
 frameworkVersion: '>=1.65.0 <2.0.0'
 
 custom:
-  BUCKET: ${self:service}-${opt:stage, self:provider.stage}-documents
-  BUCKET_REGION: ${self:provider.region}
   SNStopicName: ${self:service}-${self:provider.stage}-topic
   SNStopicArn:
     Fn::Join:
@@ -61,9 +59,9 @@ provider:
       Resource: ${self:custom.SNStopicArn}
 
   environment:
-    API_KEYS: ${env:API_KEYS, 'apikey1,apikey2'}
-    BUCKET: ${self:custom.BUCKET}
-    BUCKET_REGION: ${self:custom.BUCKET_REGION}
+    API_KEYS: ${env:API_KEYS}
+    BUCKET: ${env:BUCKET}
+    REGION: ${env:REGION}
 
   apiGateway:
       binaryMediaTypes:

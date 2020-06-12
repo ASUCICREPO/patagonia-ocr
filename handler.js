@@ -71,7 +71,12 @@ module.exports.process = async (event) => {
     if (!resumeAsync) {
       authorize(event);
 
-      console.log('STARTED requestId', requestId);
+      console.log('STARTED requestId', requestId, {
+        process.env.BUCKET,
+        process.env.REGION,
+        process.env.SNS_TOPIC_ARN,
+        process.env.TEXTRACT_ROLE_ARN,
+      });
       if (debug) {
         console.log('DEBUG mode');
         // save full event for debugging
@@ -177,7 +182,11 @@ module.exports.retrieve = async (event) => {
   }
 
   metadata.requestId = requestId;
-  console.log('STARTED requestId', requestId);
+  console.log('STARTED requestId', requestId, {
+        process.env.BUCKET,
+        process.env.REGION,
+      });
+
   if (debug) {
     console.log('DEBUG mode');
   }
