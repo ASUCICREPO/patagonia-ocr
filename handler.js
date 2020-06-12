@@ -72,10 +72,10 @@ module.exports.process = async (event) => {
       authorize(event);
 
       console.log('STARTED requestId', requestId, {
-        process.env.BUCKET,
-        process.env.REGION,
-        process.env.SNS_TOPIC_ARN,
-        process.env.TEXTRACT_ROLE_ARN,
+        BUCKET: process.env.BUCKET,
+        REGION: process.env.REGION,
+        SNS_TOPIC_ARN: process.env.SNS_TOPIC_ARN,
+        TEXTRACT_ROLE_ARN: process.env.TEXTRACT_ROLE_ARN,
       });
       if (debug) {
         console.log('DEBUG mode');
@@ -183,9 +183,9 @@ module.exports.retrieve = async (event) => {
 
   metadata.requestId = requestId;
   console.log('STARTED requestId', requestId, {
-        process.env.BUCKET,
-        process.env.REGION,
-      });
+    BUCKET: process.env.BUCKET,
+    REGION: process.env.REGION,
+  });
 
   if (debug) {
     console.log('DEBUG mode');
@@ -222,7 +222,7 @@ module.exports.retrieve = async (event) => {
         }];
         break;
 
-      // requestId does not exist
+        // requestId does not exist
       case 404: // Not Found
         metadata.status = 'NOT_FOUND';
         response = [e.statusCode, {
@@ -231,7 +231,7 @@ module.exports.retrieve = async (event) => {
         }];
         break;
 
-      // postExtraction failed
+        // postExtraction failed
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata.status = 'FAILED';
