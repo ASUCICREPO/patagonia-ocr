@@ -150,12 +150,11 @@ module.exports.retrieve = async (event) => {
   try {
     const result = await retrieveResult(requestId);
 
-    console.log('result', result);
     // already processed
     if (!result) {
       // still needs to be processed
       extracted = await getStored(requestId);
-      normalized = await postExtraction(result, requestId);
+      normalized = await postExtraction(extracted, requestId);
 
       metadata.status = 'SUCCEEDED';
       response = [200, normalized];
@@ -169,6 +168,7 @@ module.exports.retrieve = async (event) => {
     // respond the request with a registered ERROR
     switch (e.statusCode) {
       case 202: // Accepted
+        // PENDING is treated as ERROR
         metadata.status = 'PENDING';
         response = [e.statusCode, {
           statusCode: e.statusCode,
