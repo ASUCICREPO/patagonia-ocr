@@ -3,9 +3,8 @@ service: asu-cic-ocr-api
 frameworkVersion: '>=1.65.0 <2.0.0'
 
 custom:
-  BUCKET: ${self:service}-${self:provider.stage}-documents
-  BUCKET_REGION: ${self:provider.region}
-  SNStopicName: ${self:service}-${self:provider.stage}-topic
+  BUCKET: ${self:service}-${opt:stage, self:provider.stage}-documents
+  SNStopicName: ${self:service}-${opt:stage, self:provider.stage}-topic
   SNStopicArn:
     Fn::Join:
       - ":"
@@ -14,7 +13,7 @@ custom:
         - Ref: "AWS::AccountId"
         - ${self:custom.SNStopicName}
 
-  TextractRoleName: ${self:service}-${self:provider.stage}-textract-role
+  TextractRoleName: ${self:service}-${opt:stage, self:provider.stage}-textract-role
   TextractRoleArn:
     Fn::Join:
       - ":"
@@ -24,7 +23,7 @@ custom:
 
 provider:
   name: aws
-  region: ${env:AWS_REGION}
+  region: ${env:REGION}
   runtime: nodejs12.x
   timeout: 30
   memorySize: 1024
@@ -50,6 +49,15 @@ provider:
 
     - Effect: "Allow"
       Action:
+      - "s3:ListBucket"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - ${self:custom.BUCKET}
+
+    - Effect: "Allow"
+      Action:
         - "textract:StartDocumentAnalysis"
         - "textract:GetDocumentAnalysis"
         - "textract:AnalyzeDocument"
@@ -61,9 +69,9 @@ provider:
       Resource: ${self:custom.SNStopicArn}
 
   environment:
-    API_KEYS: apikey1,apikey2
-    BUCKET: ${self:custom.BUCKET}
-    BUCKET_REGION: ${self:custom.BUCKET_REGION}
+    API_KEYS: ${env:API_KEYS}
+    BUCKET: ${env:BUCKET}
+    REGION: ${env:REGION}
 
   apiGateway:
       binaryMediaTypes:

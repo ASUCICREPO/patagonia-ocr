@@ -17,22 +17,24 @@ const postExtraction = async (dataExtracted, requestId, debug) => {
 
   if (debug) {
     console.log('dataMapped', dataMapped);
+    await store.set(`${requestId}/_1_mapped.json`, JSON.stringify(dataMapped));
   }
 
   // augment and select data for known documentTypes
   const dataProcessed = processDocument(dataMapped.keyValues, dataMapped.rawText);
+  if (debug) {
+    await store.set(`${requestId}/_2_processed.json`, JSON.stringify(dataProcessed));
+  }
 
   // validate processed data
   const dataValidated = validateProcessed(dataProcessed.extracted);
+  if (debug) {
+    await store.set(`${requestId}/_3_validated.json`, JSON.stringify(dataValidated));
+  }
 
   // normalize values formatting
   const dataNormalized = normalizeValidated(dataValidated, dataProcessed.normalizer);
-
   if (debug) {
-    // save all stages of data for debugging
-    await store.set(`${requestId}/_1_mapped.json`, JSON.stringify(dataMapped));
-    await store.set(`${requestId}/_2_processed.json`, JSON.stringify(dataProcessed));
-    await store.set(`${requestId}/_3_validated.json`, JSON.stringify(dataValidated));
     await store.set(`${requestId}/_4_normalized.json`, JSON.stringify(dataNormalized));
   }
 
@@ -69,7 +71,12 @@ module.exports.process = async (event) => {
     if (!resumeAsync) {
       authorize(event);
 
-      console.log('STARTED requestId', requestId);
+      console.log('STARTED requestId', requestId, {
+        BUCKET: process.env.BUCKET,
+        REGION: process.env.REGION,
+        SNS_TOPIC_ARN: process.env.SNS_TOPIC_ARN,
+        TEXTRACT_ROLE_ARN: process.env.TEXTRACT_ROLE_ARN,
+      });
       if (debug) {
         console.log('DEBUG mode');
         // save full event for debugging
@@ -175,7 +182,11 @@ module.exports.retrieve = async (event) => {
   }
 
   metadata.requestId = requestId;
-  console.log('STARTED requestId', requestId);
+  console.log('STARTED requestId', requestId, {
+    BUCKET: process.env.BUCKET,
+    REGION: process.env.REGION,
+  });
+
   if (debug) {
     console.log('DEBUG mode');
   }
@@ -211,7 +222,7 @@ module.exports.retrieve = async (event) => {
         }];
         break;
 
-      // requestId does not exist
+        // requestId does not exist
       case 404: // Not Found
         metadata.status = 'NOT_FOUND';
         response = [e.statusCode, {
@@ -220,7 +231,7 @@ module.exports.retrieve = async (event) => {
         }];
         break;
 
-      // postExtraction failed
+        // postExtraction failed
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata.status = 'FAILED';

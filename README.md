@@ -18,7 +18,8 @@ synchronously, and the result data will be available in the same **POST** respon
 
 ## Currently Supported `file` types
 
-File posted can be any `PNG / JPG / HEIC` image or a `PDF` document.
+File posted can be any `PNG / JPG / HEIC` image or a `PDF` document. Maximum file
+size is `6MB`.
 
 ## Currently Supported `documentTypes`
 
