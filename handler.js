@@ -89,7 +89,7 @@ module.exports.process = async (event) => {
       // save full Textract output
       return respond([200, {}]);
     }
-    console.log('SUCCEEDED requestId', requestId);
+    console.log('ENDED requestId', requestId);
   } catch (e) {
     console.error(e); // log all catched errors
 
