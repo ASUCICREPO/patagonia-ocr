@@ -155,14 +155,14 @@ module.exports.retrieve = async (event) => {
     const result = await retrieveResult(requestId);
 
     if (!result) {
-      // still needs to be processed
+      // a result still needs to be processed
       extracted = await getStored(requestId);
       normalized = await postExtraction(extracted, requestId);
 
       metadata.status = 'SUCCEEDED';
       response = [200, normalized];
     } else {
-      // already processed
+      // already processed, return found result
       metadata.status = 'SUCCEEDED';
       response = [200, result];
     }
