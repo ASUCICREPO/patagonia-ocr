@@ -39,7 +39,6 @@ provider:
       Action:
       - "s3:HeadObject"
       - "s3:GetObject"
-      - "s3:ListBucket"
       - "s3:PutObject"
       Resource:
         Fn::Join:
@@ -47,6 +46,15 @@ provider:
           - - "arn:aws:s3:::"
             - ${self:custom.BUCKET}
             - "/*"
+
+    - Effect: "Allow"
+      Action:
+      - "s3:ListBucket"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - ${self:custom.BUCKET}
 
     - Effect: "Allow"
       Action:
