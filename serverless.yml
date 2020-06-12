@@ -28,7 +28,7 @@ provider:
   runtime: nodejs12.x
   timeout: 30
   memorySize: 1024
-  role: arn:aws:iam::898896572867:role/CodeBuildRoleServerless
+  role: ${env:ROL}
 
   deploymentBucket:
     maxPreviousDeploymentArtifacts: 10
