@@ -1,7 +1,7 @@
 const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
-const { upload, store, exists } = require('./lib/uploader');
+const { upload, store } = require('./lib/uploader');
 const { callTextractAsync, fetchOutput, getStored } = require('./lib/textractCallerAsync');
 const callTextractSync = require('./lib/textractCallerSync');
 const mapTextractOutput = require('./lib/textractMapper');
@@ -152,38 +152,42 @@ module.exports.retrieve = async (event) => {
   console.log('requestId', requestId);
 
   try {
-    if (await exists(requestId)) {
-      const result = await retrieveResult(requestId);
+    const result = await retrieveResult(requestId);
 
-      if (!result) {
-        // a result still needs to be processed
-        extracted = await getStored(requestId);
+    if (!result) {
+      // a result still needs to be processed
+      extracted = await getStored(requestId);
 
-        if (!extracted) {
-          // job still pending
-          metadata.status = 'PENDING';
-          response = [202, 'Accepted'];
-        } else {
-          // run process with stored extracted data
-          normalized = await postExtraction(extracted, requestId);
-
-          metadata.status = 'SUCCEEDED';
-          response = [200, normalized];
-        }
+      if (!extracted) {
+        // job still pending
+        metadata.status = 'PENDING';
+        response = [202, 'Accepted'];
       } else {
-        // already processed, return found result
+        // run process with stored extracted data
+        normalized = await postExtraction(extracted, requestId);
+
         metadata.status = 'SUCCEEDED';
-        response = [200, result];
+        response = [200, normalized];
       }
     } else {
-      metadata.status = 'NOT_FOUND';
-      response = [404, 'Not Found'];
+      // already processed, return found result
+      metadata.status = 'SUCCEEDED';
+      response = [200, result];
     }
   } catch (e) {
     console.error(e);
 
     // respond the request with a registered ERROR
     switch (e.statusCode) {
+      // requestId does not exist
+      case 404: // Not Found
+        metadata.status = 'NOT_FOUND';
+        response = [e.statusCode, {
+          statusCode: e.statusCode,
+          message: 'Not Found',
+        }];
+        break;
+
       // postExtraction failed
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
