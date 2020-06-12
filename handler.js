@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
@@ -65,7 +66,7 @@ module.exports.process = async (event) => {
   }
 
   const requestId = resumeAsync ? resumeAsync.req : `${new Date().getTime()}_${uniqid()}`;
-  metadata.requestId = requestId;
+  metadata['RequestId'] = requestId;
 
   try {
     if (!resumeAsync) {
@@ -89,13 +90,13 @@ module.exports.process = async (event) => {
       if (object.type === 'application/pdf') {
         // perform OCR on PDF file *async execution to be continued
         await callTextractAsync(object.key, requestId);
-        metadata.status = 'PENDING';
+        metadata['Status'] = 'PENDING';
         response = [202, { requestId }];
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
         normalized = await postExtraction(extracted, requestId, debug);
-        metadata.status = 'SUCCEEDED';
+        metadata['Status'] = 'SUCCEEDED';
         response = [200, normalized];
       }
     } else {
@@ -121,7 +122,7 @@ module.exports.process = async (event) => {
       case 415: // Unsupported Media Type
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
-        metadata.status = 'FAILED';
+        metadata['Status'] = 'FAILED';
         response = [e.statusCode, {
           statusCode: e.statusCode,
           message: e.message,
@@ -129,7 +130,7 @@ module.exports.process = async (event) => {
         break;
 
       default:
-        metadata.status = 'FAILED';
+        metadata['Status'] = 'FAILED';
         response = [500, {
           statusCode: 500,
           message: 'Internal Server Error',
@@ -141,12 +142,12 @@ module.exports.process = async (event) => {
 
   if (debug) {
     // add more data for debugging
-    metadata.debug = {
+    metadata.Debug = {
       object,
     };
 
     if (object.type !== 'application/pdf') {
-      metadata.debug = {
+      metadata.Debug = {
         object,
         extracted,
         normalized,
@@ -181,7 +182,7 @@ module.exports.retrieve = async (event) => {
     return respond([400, 'Bad Request']);
   }
 
-  metadata.requestId = requestId;
+  metadata['RequestId'] = requestId;
   console.log('STARTED requestId', requestId, {
     BUCKET: process.env.BUCKET,
     REGION: process.env.REGION,
@@ -201,11 +202,11 @@ module.exports.retrieve = async (event) => {
       // run process with stored extracted data
       normalized = await postExtraction(extracted, requestId, debug);
 
-      metadata.status = 'SUCCEEDED';
+      metadata['Status'] = 'SUCCEEDED';
       response = [200, normalized];
     } else {
       // already processed, return found result
-      metadata.status = 'SUCCEEDED';
+      metadata['Status'] = 'SUCCEEDED';
       response = [200, result];
     }
   } catch (e) {
@@ -215,7 +216,7 @@ module.exports.retrieve = async (event) => {
     switch (e.statusCode) {
       // job is still running
       case 202:
-        metadata.status = 'PENDING';
+        metadata['Status'] = 'PENDING';
         response = [e.statusCode, {
           statusCode: e.statusCode,
           message: 'Accepted',
@@ -224,7 +225,7 @@ module.exports.retrieve = async (event) => {
 
         // requestId does not exist
       case 404: // Not Found
-        metadata.status = 'NOT_FOUND';
+        metadata['Status'] = 'NOT_FOUND';
         response = [e.statusCode, {
           statusCode: e.statusCode,
           message: 'Not Found',
@@ -234,7 +235,7 @@ module.exports.retrieve = async (event) => {
         // postExtraction failed
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
-        metadata.status = 'FAILED';
+        metadata['Status'] = 'FAILED';
         response = [e.statusCode, {
           statusCode: e.statusCode,
           message: e.message,
@@ -242,7 +243,7 @@ module.exports.retrieve = async (event) => {
         break;
 
       default:
-        metadata.status = 'FAILED';
+        metadata['Status'] = 'FAILED';
         response = [500, {
           statusCode: 500,
           message: 'Internal Server Error',

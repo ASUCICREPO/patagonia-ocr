@@ -26,8 +26,8 @@ Retrieves the extracted data if available for a given `requestId`.
 Response will have an HTTP status of **200 OK** when process was successful and
 **202 Accepted** when process is pending.
 
-Additionally, an `errors` key may be present, with a list of keys that could not
-be extracted from the provided file, and a `status` key which should be useful to
+Additionally, an `Errors` key may be present, with a list of keys that could not
+be extracted from the provided file, and a `Status` key which should be useful to
 trigger a retry mechanism on the **GET** (value can be `SUCCEEDED`, `PENDING`,
 `FAILED` for an existing `requestId`, or `NOT_FOUND` otherwise).
 
@@ -90,16 +90,16 @@ Response will have an HTTP status of **4xx** or **5xx** when an error was encoun
 
     # response
     {
-      "type": "AZDL",
-      "first_name": "JOHN",
-      "last_name": "DOE",
-      "street_address_line_1": "921 E MAIN ST",
-      "street_address_line_2": "",
-      "city": "PHOENIX",
-      "state": "AZ",
-      "zip_code": "85001-3289",
-      "requestId": "1591890983882_dwu8kbaysgcr",
-      "status": "SUCCEEDED"
+      "Type": "AZDL",
+      "First Name": "JOHN",
+      "Last Name": "DOE",
+      "Street Address Line 1": "921 E MAIN ST",
+      "Street Address Line 2": "",
+      "City": "PHOENIX",
+      "State": "AZ",
+      "Zip Code": "85001-3289",
+      "RequestId": "1591890983882_dwu8kbaysgcr",
+      "Status": "SUCCEEDED"
     }
 ```
 
@@ -113,7 +113,7 @@ Response will have an HTTP status of **4xx** or **5xx** when an error was encoun
 
     # response
     {
-      "requestId": "1591708879608_rbloj8kb7ydbsp"
+      "RequestId": "1591708879608_rbloj8kb7ydbsp"
     }
 ```
 
@@ -125,19 +125,19 @@ Response will have an HTTP status of **4xx** or **5xx** when an error was encoun
 
     # response
     {
-      "type": "APS",
-      "first_name": "FREDDY",
-      "last_name": "DEACON",
-      "street_address_line_1": "1801 W JEFFERSON ST",
-      "street_address_line_2": "",
-      "city": "PHOENIX",
-      "state": "AZ",
-      "zip_code": "85001-3289",
+      "Type": "APS",
+      "First Name": "FREDDY",
+      "Last Name": "DEACON",
+      "Street Address Line 1": "1801 W JEFFERSON ST",
+      "Street Address Line 2": "",
+      "City": "PHOENIX",
+      "State": "AZ",
+      "Zip Code": "85001-3289",
       "bill_amount": "941.02",
       "bill_date": "5/21/2020",
       "account_number": "765412764921",
-      "errors": "street_address_line_2",
-      "status": "SUCCEEDED"
+      "errors": "Street Address Line 2",
+      "Status": "SUCCEEDED"
     }
 ```
 
