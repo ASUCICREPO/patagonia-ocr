@@ -14,15 +14,19 @@ const respond = require('./lib/responder');
 const postExtraction = async (dataExtracted, requestId) => {
   // map raw extracted output
   const dataMapped = mapTextractOutput(dataExtracted);
+  console.log('Textract data has been mapped.');
 
   // augment and select data for known documentTypes
   const dataProcessed = processDocument(dataMapped.keyValues, dataMapped.rawText);
+  console.log('Mapped data has been processed.');
 
   // validate processed data
   const dataValidated = validateProcessed(dataProcessed.extracted);
+  console.log('Processed data has been validated.');
 
   // normalize values formatting
   const dataNormalized = normalizeValidated(dataValidated, dataProcessed.normalizer);
+  console.log('Validated data has been normalized.');
 
   // save normalized data
   await saveResult(dataNormalized, requestId);
