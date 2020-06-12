@@ -28,7 +28,7 @@ provider:
   runtime: nodejs12.x
   timeout: 30
   memorySize: 1024
-  role: ${env:ROL} #Test
+  role: ${env:ROL, false}
 
   deploymentBucket:
     maxPreviousDeploymentArtifacts: 10
