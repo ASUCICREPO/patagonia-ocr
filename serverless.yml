@@ -23,7 +23,7 @@ custom:
 
 provider:
   name: aws
-  region: ${env:AWS_REGION}
+  region: ${env:REGION}
   runtime: nodejs12.x
   timeout: 30
   memorySize: 1024
