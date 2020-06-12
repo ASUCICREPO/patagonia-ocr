@@ -17,22 +17,24 @@ const postExtraction = async (dataExtracted, requestId, debug) => {
 
   if (debug) {
     console.log('dataMapped', dataMapped);
+    await store.set(`${requestId}/_1_mapped.json`, JSON.stringify(dataMapped));
   }
 
   // augment and select data for known documentTypes
   const dataProcessed = processDocument(dataMapped.keyValues, dataMapped.rawText);
+  if (debug) {
+    await store.set(`${requestId}/_2_processed.json`, JSON.stringify(dataProcessed));
+  }
 
   // validate processed data
   const dataValidated = validateProcessed(dataProcessed.extracted);
+  if (debug) {
+    await store.set(`${requestId}/_3_validated.json`, JSON.stringify(dataValidated));
+  }
 
   // normalize values formatting
   const dataNormalized = normalizeValidated(dataValidated, dataProcessed.normalizer);
-
   if (debug) {
-    // save all stages of data for debugging
-    await store.set(`${requestId}/_1_mapped.json`, JSON.stringify(dataMapped));
-    await store.set(`${requestId}/_2_processed.json`, JSON.stringify(dataProcessed));
-    await store.set(`${requestId}/_3_validated.json`, JSON.stringify(dataValidated));
     await store.set(`${requestId}/_4_normalized.json`, JSON.stringify(dataNormalized));
   }
 

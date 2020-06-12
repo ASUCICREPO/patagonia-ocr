@@ -8,6 +8,10 @@ redacted for privacy.
 - Data extracted is normalized to all upper-case on strings, bill dates are
 formatted to 'MM-DD-YYYY', and currency indicators are removed from bill amounts.
 
+- This API is intended to be private, you need to provide an `x-api-key` header which
+should match one of a comma-separated list provided as an environment variable when
+deploying.
+
 ## Request `POST /ocr`
 
 Post a file to the service. Responds with a simple `requestId` for PDFs, or with
