@@ -12,7 +12,7 @@ const { saveResult, retrieveResult } = require('./lib/resultHandler');
 const respond = require('./lib/responder');
 
 const postExtraction = async (dataExtracted, requestId) => {
-  // map extracted data
+  // map raw extracted output
   const dataMapped = mapTextractOutput(dataExtracted);
 
   // augment and select data for known documentTypes
@@ -21,6 +21,7 @@ const postExtraction = async (dataExtracted, requestId) => {
   // validate processed data
   const dataValidated = validateProcessed(dataProcessed.extracted);
 
+  // normalize values formatting
   const dataNormalized = normalizeValidated(dataValidated, dataProcessed.normalizer);
 
   // save normalized data
