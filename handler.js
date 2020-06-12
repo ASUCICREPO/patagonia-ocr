@@ -158,17 +158,11 @@ module.exports.retrieve = async (event) => {
       // a result still needs to be processed
       extracted = await getStored(requestId);
 
-      if (!extracted) {
-        // job still pending
-        metadata.status = 'PENDING';
-        response = [202, 'Accepted'];
-      } else {
-        // run process with stored extracted data
-        normalized = await postExtraction(extracted, requestId);
+      // run process with stored extracted data
+      normalized = await postExtraction(extracted, requestId);
 
-        metadata.status = 'SUCCEEDED';
-        response = [200, normalized];
-      }
+      metadata.status = 'SUCCEEDED';
+      response = [200, normalized];
     } else {
       // already processed, return found result
       metadata.status = 'SUCCEEDED';
@@ -179,6 +173,15 @@ module.exports.retrieve = async (event) => {
 
     // respond the request with a registered ERROR
     switch (e.statusCode) {
+      // job is still running
+      case 202:
+        metadata.status = 'PENDING';
+        response = [e.statusCode, {
+          statusCode: e.statusCode,
+          message: 'Accepted',
+        }];
+        break;
+
       // requestId does not exist
       case 404: // Not Found
         metadata.status = 'NOT_FOUND';
