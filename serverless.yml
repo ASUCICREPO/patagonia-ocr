@@ -3,6 +3,7 @@ service: asu-cic-ocr-api
 frameworkVersion: '>=1.65.0 <2.0.0'
 
 custom:
+  BUCKET: ${self:service}-${opt:stage, self:provider.stage}-documents
   SNStopicName: ${self:service}-${opt:stage, self:provider.stage}-topic
   SNStopicArn:
     Fn::Join:
