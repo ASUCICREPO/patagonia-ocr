@@ -84,6 +84,7 @@ module.exports.process = async (event) => {
       console.log('Resuming async execution', requestId);
 
       // fetch output from Textract API
+      console.log('Fetching Textract output', resumeAsync.job);
       extracted = await fetchOutput(resumeAsync.job, requestId);
 
       // save full Textract output
