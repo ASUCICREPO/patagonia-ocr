@@ -3,7 +3,7 @@ service: asu-cic-ocr-api
 frameworkVersion: '>=1.65.0 <2.0.0'
 
 custom:
-  SNStopicName: ${self:service}-${self:provider.stage}-topic
+  SNStopicName: ${self:service}-${opt:stage, self:provider.stage}-topic
   SNStopicArn:
     Fn::Join:
       - ":"
@@ -12,7 +12,7 @@ custom:
         - Ref: "AWS::AccountId"
         - ${self:custom.SNStopicName}
 
-  TextractRoleName: ${self:service}-${self:provider.stage}-textract-role
+  TextractRoleName: ${self:service}-${opt:stage, self:provider.stage}-textract-role
   TextractRoleArn:
     Fn::Join:
       - ":"
