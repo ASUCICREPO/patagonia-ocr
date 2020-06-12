@@ -2,7 +2,7 @@ const uniqid = require('uniqid');
 
 const authorize = require('./lib/authorizer');
 const { upload, store } = require('./lib/uploader');
-const { callTextractAsync, fetchOutput, getStored } = require('./lib/textractCallerAsync');
+const { callTextractAsync, storeOutput, getStored } = require('./lib/textractCallerAsync');
 const callTextractSync = require('./lib/textractCallerSync');
 const mapTextractOutput = require('./lib/textractMapper');
 const processDocument = require('./lib/documentProcessor');
@@ -85,7 +85,7 @@ module.exports.process = async (event) => {
 
       // fetch output from Textract API
       console.log('Fetching Textract output', resumeAsync.job);
-      extracted = await fetchOutput(resumeAsync.job, requestId);
+      extracted = await storeOutput(resumeAsync.job, requestId);
 
       // save full Textract output
       return respond([200, {}]);
