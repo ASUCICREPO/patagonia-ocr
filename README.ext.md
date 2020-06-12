@@ -44,7 +44,7 @@ first page of the bill, just below where the full name in uppercase is found.
 ## Southwest Gas
 
 Identified by finding 'Southwest Gas Corporation', 'swgas.com',
-'SOUTHWEST GAS CORPORATION'.
+'SOUTHWEST GAS'.
 
 - `first_name`, `last_name` are found from the 'Customer:' key.
 
