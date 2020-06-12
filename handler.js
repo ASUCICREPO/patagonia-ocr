@@ -30,10 +30,10 @@ const postExtraction = async (dataExtracted, requestId, debug) => {
 
   if (debug) {
     // save all stages of data for debugging
-    await store.set(`${requestId}/mapped.json`, JSON.stringify(dataMapped));
-    await store.set(`${requestId}/processed.json`, JSON.stringify(dataProcessed));
-    await store.set(`${requestId}/validated.json`, JSON.stringify(dataValidated));
-    await store.set(`${requestId}/normalized.json`, JSON.stringify(dataNormalized));
+    await store.set(`${requestId}/_1_mapped.json`, JSON.stringify(dataMapped));
+    await store.set(`${requestId}/_2_processed.json`, JSON.stringify(dataProcessed));
+    await store.set(`${requestId}/_3_validated.json`, JSON.stringify(dataValidated));
+    await store.set(`${requestId}/_4_normalized.json`, JSON.stringify(dataNormalized));
   }
 
   // save normalized data
@@ -132,14 +132,22 @@ module.exports.process = async (event) => {
     console.log('ERROR requestId', requestId);
   }
 
-  // add metadata to response
   if (debug) {
+    // add more data for debugging
     metadata.debug = {
       object,
-      extracted,
-      normalized,
     };
+
+    if (object.type !== 'application/pdf') {
+      metadata.debug = {
+        object,
+        extracted,
+        normalized,
+      };
+    }
   }
+
+  // add metadata to response
   response[1] = {
     ...response[1],
     ...metadata,
