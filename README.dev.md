@@ -16,6 +16,7 @@ Install other development dependencies `npm i`
 Configure AWS credentials, for example: `export AWS_PROFILE=asuCicProfile`
 Configure the AWS region, for example: `export REGION=us-east-1`
 Configure the desired S3 bucket's name, for example: `export BUCKET=asu-cic-ocr-api-dev-documents`
+Configure the desired API keys used for auth: `export API_KEYS=apikey1,apikey2`
 
 ## Development & Testing
 

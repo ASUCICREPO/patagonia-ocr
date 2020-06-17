@@ -1,6 +1,7 @@
 /* eslint-disable dot-notation */
 const uniqid = require('uniqid');
 
+const ApiError = require('./lib/ApiError');
 const authorize = require('./lib/authorizer');
 const { upload, store } = require('./lib/uploader');
 const { callTextractAsync, fetchAndStoreOutput, getStored } = require('./lib/textractCallerAsync');
@@ -78,6 +79,7 @@ module.exports.process = async (event) => {
         SNS_TOPIC_ARN: process.env.SNS_TOPIC_ARN,
         TEXTRACT_ROLE_ARN: process.env.TEXTRACT_ROLE_ARN,
       });
+
       if (debug) {
         console.log('DEBUG mode');
         // save full event for debugging
@@ -90,8 +92,8 @@ module.exports.process = async (event) => {
       if (object.type === 'application/pdf') {
         // perform OCR on PDF file *async execution to be continued
         await callTextractAsync(object.key, requestId);
-        metadata['Status'] = 'PENDING';
-        response = [202, { requestId }];
+        // Textract job started, return PENDING as an ERROR
+        throw new ApiError('Accepted', 202);
       } else {
         // perform OCR on IMAGE file *sync execution
         extracted = await callTextractSync(object.key);
@@ -116,6 +118,12 @@ module.exports.process = async (event) => {
 
     // respond the request with a registered ERROR
     switch (e.statusCode) {
+      // Textract job started
+      case 202:
+        metadata['Status'] = 'PENDING';
+        response = [e.statusCode, {}];
+        break;
+
       case 400: // Bad Request
       case 401: // Unauthorized
       case 413: // Payload Too Large
@@ -123,18 +131,12 @@ module.exports.process = async (event) => {
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata['Status'] = 'FAILED';
-        response = [e.statusCode, {
-          statusCode: e.statusCode,
-          message: e.message,
-        }];
+        response = [e.statusCode, {}];
         break;
 
       default:
         metadata['Status'] = 'FAILED';
-        response = [500, {
-          statusCode: 500,
-          message: 'Internal Server Error',
-        }];
+        response = [500, {}];
     }
 
     console.log('ERROR requestId', requestId);
@@ -214,40 +216,28 @@ module.exports.retrieve = async (event) => {
 
     // respond the request with a registered ERROR
     switch (e.statusCode) {
-      // job is still running
+      // Textract job is still running
       case 202:
         metadata['Status'] = 'PENDING';
-        response = [e.statusCode, {
-          statusCode: e.statusCode,
-          message: 'Accepted',
-        }];
+        response = [e.statusCode, {}];
         break;
 
         // requestId does not exist
       case 404: // Not Found
         metadata['Status'] = 'NOT_FOUND';
-        response = [e.statusCode, {
-          statusCode: e.statusCode,
-          message: 'Not Found',
-        }];
+        response = [e.statusCode, {}];
         break;
 
         // postExtraction failed
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata['Status'] = 'FAILED';
-        response = [e.statusCode, {
-          statusCode: e.statusCode,
-          message: e.message,
-        }];
+        response = [e.statusCode, {}];
         break;
 
       default:
         metadata['Status'] = 'FAILED';
-        response = [500, {
-          statusCode: 500,
-          message: 'Internal Server Error',
-        }];
+        response = [500, {}];
     }
   }
 
