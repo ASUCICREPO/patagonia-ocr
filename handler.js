@@ -231,6 +231,7 @@ module.exports.retrieve = async (event) => {
         break;
 
         // postExtraction failed
+      case 401: // Unauthorized
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata['Status'] = 'FAILED';
