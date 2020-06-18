@@ -184,6 +184,8 @@ module.exports.retrieve = async (event) => {
     return respond([400, 'Bad Request']);
   }
 
+  authorize(event);
+
   metadata['RequestId'] = requestId;
   console.log('STARTED requestId', requestId, {
     BUCKET: process.env.BUCKET,
