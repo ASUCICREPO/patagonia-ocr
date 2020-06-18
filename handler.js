@@ -126,27 +126,25 @@ module.exports.process = async (event) => {
 
       case 400: // Bad Request
         response = [e.statusCode, {
-          message: 'Bad Request',
+          Message: 'Bad Request',
         }];
         break;
 
       case 401: // Unauthorized
-        response = [e.statusCode, {
-          message: 'Missing Authentication Token',
-        }];
-        break;
-
       case 413: // Payload Too Large
       case 415: // Unsupported Media Type
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
-        metadata['Status'] = 'FAILED';
-        response = [e.statusCode, {}];
+        response = [e.statusCode, {
+          Message: e.message,
+        }];
         break;
 
       default:
         metadata['Status'] = 'FAILED';
-        response = [500, {}];
+        response = [500, {
+          Message: 'Internal Server Error',
+        }];
     }
 
     console.log('ERROR requestId', requestId);
@@ -192,7 +190,7 @@ module.exports.retrieve = async (event) => {
 
   if (!requestId) {
     return respond([400, {
-      message: 'Bad Request',
+      Message: 'Bad Request',
     }]);
   }
   metadata['RequestId'] = requestId;
@@ -244,19 +242,22 @@ module.exports.retrieve = async (event) => {
         // postExtraction failed
       case 401: // Unauthorized
         response = [e.statusCode, {
-          message: 'Missing Authentication Token',
+          Message: 'Missing Authentication Token',
         }];
         break;
 
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
-        metadata['Status'] = 'FAILED';
-        response = [e.statusCode, {}];
+        response = [e.statusCode, {
+          Message: e.message,
+        }];
         break;
 
       default:
         metadata['Status'] = 'FAILED';
-        response = [500, {}];
+        response = [500, {
+          Message: 'Internal Server Error',
+        }];
     }
   }
 
