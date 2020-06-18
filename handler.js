@@ -125,7 +125,17 @@ module.exports.process = async (event) => {
         break;
 
       case 400: // Bad Request
+        response = [e.statusCode, {
+          message: 'Bad Request',
+        }];
+        break;
+
       case 401: // Unauthorized
+        response = [e.statusCode, {
+          message: 'Missing Authentication Token',
+        }];
+        break;
+
       case 413: // Payload Too Large
       case 415: // Unsupported Media Type
       case 422: // Unprocessable Entity
@@ -181,7 +191,9 @@ module.exports.retrieve = async (event) => {
   const { requestId } = params;
 
   if (!requestId) {
-    return respond([400, 'Bad Request']);
+    return respond([400, {
+      message: 'Bad Request',
+    }]);
   }
   metadata['RequestId'] = requestId;
 
@@ -231,6 +243,11 @@ module.exports.retrieve = async (event) => {
 
         // postExtraction failed
       case 401: // Unauthorized
+        response = [e.statusCode, {
+          message: 'Missing Authentication Token',
+        }];
+        break;
+
       case 422: // Unprocessable Entity
       case 501: // Not Implemented
         metadata['Status'] = 'FAILED';
