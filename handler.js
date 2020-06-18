@@ -183,20 +183,19 @@ module.exports.retrieve = async (event) => {
   if (!requestId) {
     return respond([400, 'Bad Request']);
   }
-
-  authorize(event);
-
   metadata['RequestId'] = requestId;
-  console.log('STARTED requestId', requestId, {
-    BUCKET: process.env.BUCKET,
-    REGION: process.env.REGION,
-  });
-
-  if (debug) {
-    console.log('DEBUG mode');
-  }
 
   try {
+    console.log('STARTED requestId', requestId, {
+      BUCKET: process.env.BUCKET,
+      REGION: process.env.REGION,
+    });
+
+    if (debug) {
+      console.log('DEBUG mode');
+    }
+
+    authorize(event);
     const result = await retrieveResult(requestId);
 
     if (!result) {

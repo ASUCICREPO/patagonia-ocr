@@ -1,0 +1,14 @@
+- street_address_line_2 should that one be the one with `SCOTTSDALE AZ
+  85258-4824` in the pdf bill?
+
+- Full name splitting into first_name + last_name may not be accurate
+
+- Also there's the case of multiple customers names in a bill
+  ('John Doe or Jane Doe')
+
+- S3 lifecycle uploads deletion after 2 weeks? personal information issues
+
+- Textract may extract some faulty dates or words, already found these:
+    * 7/2/2019 => 712/2019
+    *      API => AP|
+
