@@ -155,15 +155,18 @@ module.exports.process = async (event) => {
   if (debug) {
     // add more data for debugging
     metadata.Debug = {
-      object,
+      Object: object,
     };
 
+    if (response[1].Mapped) {
+      // mapped is available in normalized, move to Debug node
+      metadata.Debug.Mapped = response[1].Mapped;
+      delete response[1].Mapped;
+    }
+
     if (object.type !== 'application/pdf') {
-      metadata.Debug = {
-        object,
-        extracted,
-        normalized,
-      };
+      metadata.Debug.Extracted = extracted;
+      metadata.Debug.Normalized = normalized;
     }
   }
 
