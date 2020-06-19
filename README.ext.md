@@ -26,7 +26,7 @@ with an '8'.
 Identified by finding 'aps', 'Your electricity bill', 'aps.com'.
 
 - `first_name`, `last_name` are found from below the 'Your electricity bill' line
-at the top.
+at the top, otherwise found at the bottom.
 
 - `street_address_line_1`, `street_address_line_2` are found in the bottom of the
 first page of the bill, just below where the full name in uppercase is found.
