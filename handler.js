@@ -38,6 +38,8 @@ const postExtraction = async (dataExtracted, requestId, debug) => {
   const dataNormalized = normalizeValidated(dataValidated, dataProcessed.normalizer);
   if (debug) {
     await store.set(`${requestId}/_4_normalized.json`, JSON.stringify(dataNormalized));
+    // output mapped data on debug
+    dataNormalized.Mapped = dataMapped;
   }
 
   // save normalized data
