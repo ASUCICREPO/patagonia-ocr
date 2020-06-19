@@ -266,6 +266,21 @@ module.exports.retrieve = async (event) => {
     }
   }
 
+  if (debug) {
+    // add more data for debugging
+    metadata.Debug = {};
+
+    if (response[1].Mapped) {
+      // mapped is available in normalized, move to Debug node
+      metadata.Debug.Mapped = response[1].Mapped;
+      delete response[1].Mapped;
+    }
+
+    metadata.Debug.Extracted = extracted;
+    metadata.Debug.Normalized = normalized;
+  }
+
+  // add metadata to response
   response[1] = {
     ...response[1],
     ...metadata,
