@@ -23,7 +23,7 @@ with an '8'.
 
 ## APS
 
-Identified by finding 'aps', 'Your electricity bill', 'News from APS'.
+Identified by finding 'aps', 'Your electricity bill', 'aps.com'.
 
 - `first_name`, `last_name` are found from below the 'Your electricity bill' line
 at the top.
