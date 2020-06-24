@@ -90,7 +90,7 @@ Response will have an HTTP status of **4xx** or **5xx** when an error was encoun
 
     # response
     {
-      "Type": "AZDL",
+      "Type": "Arizona's Driver License",
       "First Name": "JOHN",
       "Last Name": "DOE",
       "Street Address Line 1": "921 E MAIN ST",
