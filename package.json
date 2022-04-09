@@ -23,7 +23,7 @@
     "csv-parse": "^4.10.1",
     "file-type": "^14.6.0",
     "heic-convert": "^1.2.2",
-    "moment": "^2.26.0",
+    "moment": "^2.29.2",
     "string-similarity": "^4.0.1",
     "uniqid": "^5.2.0"
   },
