@@ -18,7 +18,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/patagoniantech/asu-cic-textract-api#readme",
   "dependencies": {
-    "aws-sdk": "^2.682.0",
+    "aws-sdk": "^2.814.0",
     "busboy": "^0.3.1",
     "csv-parse": "^4.10.1",
     "file-type": "^14.6.0",
